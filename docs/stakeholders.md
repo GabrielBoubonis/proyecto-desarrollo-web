@@ -5,6 +5,8 @@ cada una se describe su rol y se justifica su importancia estratégica para el p
 
 ## Vecino solicitante
 
+**Tipo:** Externo 
+
 Ciudadano que reporta una necesidad de servicio o intervención sobre un ejemplar del
 arbolado público de Rosario (en la vereda de su domicilio o en cualquier otro espacio de
 la ciudad). Detecta la problemática e inicia el circuito al ingresar la solicitud al sistema
@@ -16,6 +18,8 @@ reflejará en una solución más rápida para el ciudadano.
 
 ## Director administrativo
 
+**Tipo:** Interno
+
 Autoridad máxima encargada de supervisar el circuito administrativo, los tiempos de
 resolución y la optimización de recursos de la Dirección. Monitorea periódicamente el
 estado de los trámites y analiza indicadores de rendimiento del área.
@@ -25,6 +29,8 @@ institucional del proyecto. Es el principal interesado en contar con un dashboar
 centralice métricas para la toma de decisiones estratégicas.
 
 ## Área de Diagramación de Datos
+
+**Tipo:** Interno 
 
 Oficina interna responsable de la recepción, clasificación, derivación y seguimiento
 administrativo de los reclamos. Actualmente actúa como nexo manual crítico: recibe los
@@ -37,6 +43,8 @@ la duplicación de tareas. El nuevo sistema automatiza la digitalización desde 
 eliminando la carga manual y el riesgo de errores de transcripción.
 
 ## Dirección Técnica de Arbolado
+
+**Tipo:** Interno 
 
 Área técnica especializada y principal actor afectado positivamente por el nuevo sistema.
 Su participación activa (entrevistas, mesas de trabajo, análisis del histórico de
@@ -51,6 +59,8 @@ la distribución de recursos técnicos y humanos en el territorio.
 
 ## Centro de Informática Local (CIL)
 
+**Tipo:** Interno 
+
 Área tecnológica interna a cargo del soporte, la infraestructura y la seguridad de los
 sistemas de la organización. Su intervención en este proyecto se acota a la fase de
 despliegue, integración y mantenimiento.
@@ -59,6 +69,30 @@ despliegue, integración y mantenimiento.
 vincular la aplicación con las bases de datos institucionales y de desplegarla en los
 dispositivos móviles corporativos del personal de campo, así como de su gobernanza,
 mantenimiento y soporte técnico.
+
+## SUA (Sistema Único de Atención)
+
+**Tipo:** Sistema externo  
+
+**Por qué es clave:** Es la plataforma informática centralizada de toda la Municipalidad de Rosario, de la cual el sistema consume los reclamos ya filtrados por tipo y subtipo. El sistema de Dictaminado y Rutas Eficientes no diseña un modelo de datos propio para los reclamos: interactúa directamente con la base del SUA a través de un adaptador (`IReclamoProvider`), leyendo las solicitudes y actualizando su estado cuando un dictamen queda firmado. Cualquier caída o cambio en el SUA impacta directamente en la disponibilidad del sistema.
+
+## Autenticación Institucional
+
+**Tipo:** Sistema externo  
+
+**Por qué es clave:** La repartición utiliza un mecanismo de identidad y permisos unificado a nivel municipal. El sistema delega en él la validación de usuario/contraseña y la gestión de altas, bajas y permisos, en lugar de mantener una base de credenciales propia. Esto reduce superficie de riesgo de seguridad y evita duplicar la administración de usuarios, pero también implica que el sistema depende por completo de la disponibilidad de este servicio externo para que cualquier persona pueda iniciar sesión.
+
+## Tabla resumen
+
+| Stakeholder                            | Tipo             | Nivel de impacto |
+|----------------------------------------|------------------|------------------|
+| **Vecino solicitante**                 | Externo          | Medio            |
+| **Director administrativo**            | Interno          | Alto             |
+| **Área de Diagramación de Datos**      | Interno          | Alto             |
+| **Dirección Técnica de Arbolado**      | Interno          | Alto             |
+| **Centro de Informática Local (CIL)**  | Interno          | Medio            |
+| **SUA (Sistema Único de Atención)**    | Sistema externo  | Alto             |
+| **Autenticación Institucional**        | Sistema externo  | Alto             |
 
 ## Modelo de roles y permisos
 
