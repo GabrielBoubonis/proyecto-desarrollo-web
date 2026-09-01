@@ -3,11 +3,7 @@
 Partes interesadas relevantes para el sistema de Dictaminado y Rutas Eficientes. Para
 cada una se describe su rol y se justifica su importancia estratégica para el proyecto.
 
----
-
 ## Vecino solicitante
-
-**Tipo:** Externo 
 
 Ciudadano que reporta una necesidad de servicio o intervención sobre un ejemplar del
 arbolado público de Rosario (en la vereda de su domicilio o en cualquier otro espacio de
@@ -18,16 +14,7 @@ general (SUA).
 Si el sistema optimiza los tiempos de dictaminación internos, el impacto directo se
 reflejará en una solución más rápida para el ciudadano.
 
-**Aclaración:** el vecino no interactúa directamente con el sistema de Dictaminado y Rutas
-Eficientes. Su participación se limita a la carga del reclamo en el SUA, que ocurre antes y
-por fuera del alcance de este sistema. Se lo incluye como stakeholder indirecto: no es
-usuario de la aplicación, pero es el beneficiario final de las mejoras que esta introduce.
-
----
-
 ## Director administrativo
-
-**Tipo:** Interno
 
 Autoridad máxima encargada de supervisar el circuito administrativo, los tiempos de
 resolución y la optimización de recursos de la Dirección. Monitorea periódicamente el
@@ -37,11 +24,7 @@ estado de los trámites y analiza indicadores de rendimiento del área.
 institucional del proyecto. Es el principal interesado en contar con un dashboard que
 centralice métricas para la toma de decisiones estratégicas.
 
----
-
 ## Área de Diagramación de Datos
-
-**Tipo:** Interno 
 
 Oficina interna responsable de la recepción, clasificación, derivación y seguimiento
 administrativo de los reclamos. Actualmente actúa como nexo manual crítico: recibe los
@@ -53,11 +36,7 @@ paralelas por falta de herramientas específicas.
 la duplicación de tareas. El nuevo sistema automatiza la digitalización desde el origen,
 eliminando la carga manual y el riesgo de errores de transcripción.
 
----
-
 ## Dirección Técnica de Arbolado
-
-**Tipo:** Interno 
 
 Área técnica especializada y principal actor afectado positivamente por el nuevo sistema.
 Su participación activa (entrevistas, mesas de trabajo, análisis del histórico de
@@ -70,11 +49,7 @@ puede intervenir un ejemplar sin el aval y la firma de un dictamen técnico prev
 provee una herramienta para reordenar prioridades, planificar rutas eficientes y optimizar
 la distribución de recursos técnicos y humanos en el territorio.
 
----
-
 ## Centro de Informática Local (CIL)
-
-**Tipo:** Interno 
 
 Área tecnológica interna a cargo del soporte, la infraestructura y la seguridad de los
 sistemas de la organización. Su intervención en este proyecto se acota a la fase de
@@ -84,53 +59,6 @@ despliegue, integración y mantenimiento.
 vincular la aplicación con las bases de datos institucionales y de desplegarla en los
 dispositivos móviles corporativos del personal de campo, así como de su gobernanza,
 mantenimiento y soporte técnico.
-
----
-
-## SUA (Sistema Único de Atención)
-
-**Tipo:** Sistema externo
-
-Plataforma informática transversal a toda la Municipalidad de Rosario, utilizada para
-registrar, derivar, hacer seguimiento y resolver los reclamos ciudadanos. El sistema de
-Dictaminado y Rutas Eficientes no diseña un modelo de datos propio para los reclamos:
-consume del SUA, a través de un adaptador, únicamente las solicitudes filtradas por
-Tipo: "Reclamo" y Subtipo: "Problemas con el arbolado público", y le devuelve la
-actualización de estado una vez que el dictamen queda firmado.
-
-**¿Por qué es clave?** Es la fuente de datos primaria del sistema y el destino de la
-actualización de estado. Sin disponibilidad del SUA, el sistema no tiene reclamos que
-mostrar ni forma de cerrar el circuito del dictamen.
-
----
-
-## Autenticación Institucional
-
-**Tipo:** Sistema externo
-
-Mecanismo de identidad y permisos unificado de la Municipalidad de Rosario, utilizado
-por los distintos sistemas internos de la organización para validar usuario y contraseña
-y determinar el rol de acceso correspondiente. El sistema se acopla a este servicio en
-lugar de gestionar sus propias credenciales.
-
-**¿Por qué es clave?** Es el punto de entrada obligatorio a la aplicación: ningún usuario
-puede iniciar sesión sin que este servicio valide sus credenciales. Delegar la
-autenticación evita duplicar la administración de usuarios y mantiene al sistema alineado
-con la política de seguridad institucional vigente.
-
----
-
-## Tabla resumen
-
-| Stakeholder                            | Tipo             | Nivel de impacto |
-|----------------------------------------|------------------|------------------|
-| **Vecino solicitante**                 | Externo          | Medio            |
-| **Director administrativo**            | Interno          | Alto             |
-| **Área de Diagramación de Datos**      | Interno          | Alto             |
-| **Dirección Técnica de Arbolado**      | Interno          | Alto             |
-| **Centro de Informática Local (CIL)**  | Interno          | Medio            |
-| **SUA (Sistema Único de Atención)**    | Sistema externo  | Alto             |
-| **Autenticación Institucional**        | Sistema externo  | Alto             |
 
 ## Modelo de roles y permisos
 
