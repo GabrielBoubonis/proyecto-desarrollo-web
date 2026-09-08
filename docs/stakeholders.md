@@ -1,136 +1,161 @@
-# Identificación de stakeholders
-
-Partes interesadas relevantes para el sistema de Dictaminado y Rutas Eficientes. Para
-cada una se describe su rol y se justifica su importancia estratégica para el proyecto.
-
+# Stakeholders
+ 
+> **Nota de alcance:** este sistema resuelve únicamente la etapa de dictaminación técnica
+> y planificación de rutas dentro de la Dirección Técnica de Arbolado, posterior al
+> filtrado y asignación del reclamo por parte del circuito general del SUA. Por eso esta
+> lista es más acotada que la relevada en el PPI (Práctica Profesionalizante I): actores
+> como Munibot y las oficinas/distritos de atención presencial, que intervienen en el
+> ingreso del reclamo, no tienen interacción -ni directa ni indirecta- con este sistema.
+> Sí se incluyen actores externos que, sin usar el sistema, quedan conectados por el
+> circuito del SUA aguas arriba (Vecino solicitante) o aguas abajo (Empresas
+> concesionarias), por ser origen o consecuencia directa de lo que el sistema produce.
+ 
 ---
-
+ 
 ## Vecino solicitante
-
-**Tipo:** Externo 
-
-Ciudadano que reporta una necesidad de servicio o intervención sobre un ejemplar del
-arbolado público de Rosario (en la vereda de su domicilio o en cualquier otro espacio de
-la ciudad). Detecta la problemática e inicia el circuito al ingresar la solicitud al sistema
-general (SUA).
-
-**¿Por qué es clave?** Es el usuario externo que justifica la existencia de la repartición.
-Si el sistema optimiza los tiempos de dictaminación internos, el impacto directo se
-reflejará en una solución más rápida para el ciudadano.
-
-**Aclaración:** el vecino no interactúa directamente con el sistema de Dictaminado y Rutas
-Eficientes. Su participación se limita a la carga del reclamo en el SUA, que ocurre antes y
-por fuera del alcance de este sistema. Se lo incluye como stakeholder indirecto: no es
-usuario de la aplicación, pero es el beneficiario final de las mejoras que esta introduce.
-
+**Tipo:** Externo
+**Subtipo:** Usuario indirecto
+**Descripción:** Es la persona que reporta un problema de arbolado público en la vía
+pública a través del SUA, ya sea de forma presencial, telefónica o digital. No interactúa
+nunca de forma directa con el sistema de dictaminado: su reclamo llega ya cargado y
+clasificado en el SUA, y el sistema lo consulta desde ahí.
+**Por qué es clave:** Es el origen de todo el circuito — sin su reclamo no existe caso para
+dictaminar — y el destinatario final del servicio: la calidad y el tiempo de respuesta del
+dictamen impactan directamente en la resolución de su problema, aunque él nunca vea el
+sistema en sí.
+ 
 ---
-
+ 
 ## Director administrativo
-
 **Tipo:** Interno
-
-Autoridad máxima encargada de supervisar el circuito administrativo, los tiempos de
-resolución y la optimización de recursos de la Dirección. Monitorea periódicamente el
-estado de los trámites y analiza indicadores de rendimiento del área.
-
-**¿Por qué es clave?** Su validación es indispensable para la aprobación e implementación
-institucional del proyecto. Es el principal interesado en contar con un dashboard que
-centralice métricas para la toma de decisiones estratégicas.
-
+**Subtipo:** Propietario del producto
+**Descripción:** Supervisa la gestión general de las áreas involucradas en el circuito de
+dictaminación de reclamos de arbolado. Interviene en los casos extraordinarios que no se
+ajustan a los procedimientos regulares, tomando decisiones puntuales sobre cómo
+resolverlos. Es el principal interesado en el dashboard de métricas del sistema.
+**Por qué es clave:** Tiene la visión estratégica sobre cómo debe funcionar el proceso de
+dictaminación y aprueba el proyecto; sus decisiones sobre casos excepcionales definen
+reglas que terminan reflejadas en el sistema.
+ 
 ---
-
+ 
 ## Área de Diagramación de Datos
-
-**Tipo:** Interno 
-
-Oficina interna responsable de la recepción, clasificación, derivación y seguimiento
-administrativo de los reclamos. Actualmente actúa como nexo manual crítico: recibe los
-dictámenes técnicos en papel, busca cada solicitud en el SUA y transcribe manualmente la
-información para actualizar y cerrar las actuaciones, apoyándose en planillas de cálculo
-paralelas por falta de herramientas específicas.
-
-**¿Por qué es clave?** Sufre directamente la ineficiencia del traspaso "papel a digital" y
-la duplicación de tareas. El nuevo sistema automatiza la digitalización desde el origen,
-eliminando la carga manual y el riesgo de errores de transcripción.
-
+**Tipo:** Interno
+**Subtipo:** Usuario primario
+**Descripción:** Responsable del procesamiento de la información proveniente del sistema:
+genera estadísticas, analiza presupuestos por intervención y realiza ajustes en la
+logística del flujo de datos. En casos complejos también participa en decisiones
+operativas sobre reorganización del circuito.
+**Por qué es clave:** Es quien transforma los datos que produce el sistema (dictámenes,
+rutas, métricas) en información de gestión para la Dirección; sin su análisis, el dashboard
+y las métricas del sistema perderían buena parte de su utilidad.
+ 
 ---
-
+ 
+## Área de Procesamiento de Datos
+**Tipo:** Interno
+**Subtipo:** Usuario indirecto (impactado)
+**Descripción:** Área operativa que históricamente recibía, gestionaba y derivaba los
+reclamos según zona geográfica y tipo de problema, y transcribía los dictámenes emitidos
+en papel al sistema. También atendía consultas de vecinos sobre el estado de sus reclamos.
+**Por qué es clave:** No usa el sistema nuevo de forma directa, pero es impactada por él:
+la firma digital y la actualización automática de estado eliminan la tarea manual de
+transcripción papel→digital que antes realizaba, liberando esa carga operativa.
+ 
+---
+ 
 ## Dirección Técnica de Arbolado
-
-**Tipo:** Interno 
-
-Área técnica especializada y principal actor afectado positivamente por el nuevo sistema.
-Su participación activa (entrevistas, mesas de trabajo, análisis del histórico de
-dictámenes) fue la base para el diseño de la aplicación. Es un eslabón crítico en el ciclo
-de vida del reclamo: según la Ordenanza N.º 5.118, la normativa de arbolado urbano, la Ley
-Provincial del Árbol N.º 13.836 y la Ley Provincial N.º 9.004, ninguna cuadrilla operativa
-puede intervenir un ejemplar sin el aval y la firma de un dictamen técnico previo.
-
-**¿Por qué es clave?** Es el stakeholder con mayor interés estratégico. El sistema le
-provee una herramienta para reordenar prioridades, planificar rutas eficientes y optimizar
-la distribución de recursos técnicos y humanos en el territorio.
-
+**Tipo:** Interno
+**Subtipo:** Usuario primario
+**Descripción:** Integrada por personal técnico especializado, es la responsable de
+realizar los dictámenes técnicos sobre los árboles involucrados en los reclamos: detecta
+el problema, registra las características del ejemplar (especie, tamaño, estado,
+ubicación) y define la intervención necesaria (poda, extracción, etc.).
+**Por qué es clave:** Es el stakeholder con mayor interés estratégico en el sistema —
+validó el diseño en entrevistas y mesas de trabajo — y su tarea diaria (dictaminar y
+planificar rutas de recorrido) es exactamente lo que el sistema resuelve.
+ 
 ---
-
+ 
 ## Centro de Informática Local (CIL)
-
-**Tipo:** Interno 
-
-Área tecnológica interna a cargo del soporte, la infraestructura y la seguridad de los
-sistemas de la organización. Su intervención en este proyecto se acota a la fase de
-despliegue, integración y mantenimiento.
-
-**¿Por qué es clave?** Será responsable de configurar los conectores/adaptadores para
-vincular la aplicación con las bases de datos institucionales y de desplegarla en los
-dispositivos móviles corporativos del personal de campo, así como de su gobernanza,
-mantenimiento y soporte técnico.
-
+**Tipo:** Interno
+**Subtipo:** Administrador técnico / Soporte técnico
+**Descripción:** Área responsable de la infraestructura tecnológica, el despliegue, la
+integración con otros sistemas y el soporte técnico. Gestiona los conectores del sistema y
+realiza altas, bajas y modificaciones de usuarios, cumpliendo además el rol de
+Administrador dentro del propio sistema.
+**Por qué es clave:** Es una dependencia técnica crítica: sin su intervención el sistema
+no se despliega, no se mantiene y nadie puede acceder a él, ya que es quien gestiona los
+usuarios y permisos.
+ 
 ---
-
+ 
 ## SUA (Sistema Único de Atención)
-
 **Tipo:** Sistema externo
-
-Plataforma informática transversal a toda la Municipalidad de Rosario, utilizada para
-registrar, derivar, hacer seguimiento y resolver los reclamos ciudadanos. El sistema de
-Dictaminado y Rutas Eficientes no diseña un modelo de datos propio para los reclamos:
-consume del SUA, a través de un adaptador, únicamente las solicitudes filtradas por
-Tipo: "Reclamo" y Subtipo: "Problemas con el arbolado público", y le devuelve la
-actualización de estado una vez que el dictamen queda firmado.
-
-**¿Por qué es clave?** Es la fuente de datos primaria del sistema y el destino de la
-actualización de estado. Sin disponibilidad del SUA, el sistema no tiene reclamos que
-mostrar ni forma de cerrar el circuito del dictamen.
-
+**Subtipo:** — (no aplica; es un sistema, no una persona o rol)
+**Descripción:** Sistema municipal donde se cargan y clasifican todos los reclamos
+vecinales, incluidos los de arbolado público. Es la fuente de datos primaria del sistema
+de dictaminado: desde ahí llegan los reclamos pendientes y hacia ahí se actualiza el
+estado una vez firmado el dictamen.
+**Por qué es clave:** Es una dependencia técnica sin la cual el sistema no tiene datos de
+entrada ni forma de reportar sus resultados; toda la lógica de negocio depende de esta
+integración, por eso se implementa desacoplada mediante la interfaz `IReclamoProvider`.
+ 
 ---
-
+ 
 ## Autenticación Institucional
-
 **Tipo:** Sistema externo
-
-Mecanismo de identidad y permisos unificado de la Municipalidad de Rosario, utilizado
-por los distintos sistemas internos de la organización para validar usuario y contraseña
-y determinar el rol de acceso correspondiente. El sistema se acopla a este servicio en
-lugar de gestionar sus propias credenciales.
-
-**¿Por qué es clave?** Es el punto de entrada obligatorio a la aplicación: ningún usuario
-puede iniciar sesión sin que este servicio valide sus credenciales. Delegar la
-autenticación evita duplicar la administración de usuarios y mantiene al sistema alineado
-con la política de seguridad institucional vigente.
-
+**Subtipo:** — (no aplica; es un sistema, no una persona o rol)
+**Descripción:** Sistema municipal que valida las credenciales (usuario/contraseña
+institucional) del personal que accede al sistema de dictaminado.
+**Por qué es clave:** Sin su validación, ningún usuario podría iniciar sesión; es una
+dependencia técnica de acceso, por eso también se desacopla mediante la interfaz
+`IAuthProvider`.
+ 
 ---
-
+ 
+## Empresas concesionarias
+**Tipo:** Externo
+**Subtipo:** Usuario indirecto
+**Descripción:** Entidades externas habilitadas por la municipalidad para realizar
+intervenciones sobre el arbolado urbano (podas, extracciones, cortes de raíces) cuando la
+Dirección Técnica no cuenta con recursos propios para ejecutarlas.
+**Por qué es clave:** No interactúan con el sistema de dictaminado en ningún momento,
+pero el contenido técnico del dictamen que este sistema produce (qué intervención
+corresponde) es lo que después, aguas abajo y vía SUA, puede derivar trabajo hacia ellas.
+ 
+---
+ 
+## Equipo de desarrollo
+**Tipo:** Interno
+**Subtipo:** Desarrolladores y mantenedores
+**Descripción:** Grupo de estudiantes responsable del diseño, desarrollo y mantenimiento
+del prototipo del sistema, incluida la arquitectura desacoplada (interfaces
+`IReclamoProvider` e `IAuthProvider`) y la lógica de firma digital.
+**Por qué es clave:** Define las decisiones técnicas y de arquitectura que hacen posible
+integrar el sistema con SUA y Autenticación Institucional en producción sin reescribir la
+lógica de negocio.
+ 
+---
+ 
 ## Tabla resumen
-
-| Stakeholder                            | Tipo             | Nivel de impacto |
-|----------------------------------------|------------------|------------------|
-| **Vecino solicitante**                 | Externo          | Medio            |
-| **Director administrativo**            | Interno          | Alto             |
-| **Área de Diagramación de Datos**      | Interno          | Alto             |
-| **Dirección Técnica de Arbolado**      | Interno          | Alto             |
-| **Centro de Informática Local (CIL)**  | Interno          | Medio            |
-| **SUA (Sistema Único de Atención)**    | Sistema externo  | Alto             |
-| **Autenticación Institucional**        | Sistema externo  | Alto             |
+ 
+| Stakeholder | Tipo | Subtipo | Nivel de impacto |
+|-------------|------|---------|-------------------|
+| Vecino solicitante | Externo | Usuario indirecto | Medio |
+| Director administrativo | Interno | Propietario del producto | Alto |
+| Área de Diagramación de Datos | Interno | Usuario primario | Alto |
+| Área de Procesamiento de Datos | Interno | Usuario indirecto (impactado) | Medio |
+| Dirección Técnica de Arbolado | Interno | Usuario primario | Alto |
+| Centro de Informática Local (CIL) | Interno | Administrador técnico / Soporte técnico | Alto |
+| SUA (Sistema Único de Atención) | Sistema externo | — | Alto |
+| Autenticación Institucional | Sistema externo | — | Alto |
+| Empresas concesionarias | Externo | Usuario indirecto | Medio |
+| Equipo de desarrollo | Interno | Desarrolladores y mantenedores | Alto |
+ 
+**Criterio usado para Nivel de impacto:** Alto = usa el sistema a diario, decide sobre él,
+o es una dependencia técnica sin la cual el sistema no funciona. Medio = interviene de
+forma indirecta o puntual.
 
 ## Modelo de roles y permisos
 
