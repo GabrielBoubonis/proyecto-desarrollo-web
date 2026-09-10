@@ -302,3 +302,32 @@ _Cada historia debe incluir formato clásico, criterios de aceptación y validac
 | Estimable | Sí | |
 | Pequeña | Sí | |
 | Verificable | Sí | |
+
+---
+
+## HU-12 — Atender solicitudes de emergencia por tormenta
+
+| Campo | Detalle |
+|-------|---------|
+| Historia | Como Operador, quiero generar una ruta con las solicitudes de tormenta más antiguas, para atender primero las emergencias climáticas que tienen prioridad máxima. |
+| Módulo | Protocolo por tormenta |
+| Requisitos relacionados | RF-38, RF-39, RF-40, RF-41, RF-42, RF-43 |
+
+### Criterios de aceptación
+
+1. Dado que Procesamiento de Datos derivó una solicitud con la etiqueta "emergencia por tormenta", esta aparece únicamente en la sección "Protocolo por tormenta", no en el listado general de solicitudes.
+2. Dado que existen solicitudes de tormenta pendientes, el sistema muestra un indicador visual animado que señala su máxima prioridad.
+3. Dado que indico una cantidad de solicitudes, cuando genero una ruta de tormenta, el sistema selecciona las solicitudes pendientes más antiguas hasta completar esa cantidad.
+4. Una solicitud de tormenta incluida en mi ruta no puede aparecer en la ruta de otro ingeniero hasta que la dictamine, presione "Restablecer" o sean las 18:00 hs.
+5. El dictamen de una solicitud de tormenta se completa con el mismo formulario que cualquier otro dictamen, sin campos adicionales.
+
+### Validación INVEST
+
+| Criterio | ¿Se cumple? | Observación |
+|----------|-------------|-------------|
+| Independiente | Parcial | Reutiliza la lógica de rutas y dictaminación ya construida en HU-04 y HU-06; depende de que esos módulos existan. |
+| Negociable | Sí | |
+| Valiosa | Sí | Resuelve la necesidad operativa de priorizar emergencias climáticas por sobre el trabajo habitual. |
+| Estimable | Sí | |
+| Pequeña | Sí | Al reutilizar la lógica de rutas y dictaminación, el esfuerzo adicional es acotado (filtro, orden por antigüedad, indicador visual). |
+| Verificable | Sí | |

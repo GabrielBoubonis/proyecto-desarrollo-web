@@ -1,5 +1,7 @@
 # Stakeholders
- 
+_Identificar y justificar las partes interesadas relevantes para el sistema._
+_Para cada una: describir su rol y por qué es clave para el proyecto._
+
 > **Nota de alcance:** este sistema resuelve únicamente la etapa de dictaminación técnica
 > y planificación de rutas dentro de la Dirección Técnica de Arbolado, posterior al
 > filtrado y asignación del reclamo por parte del circuito general del SUA. Por eso esta
@@ -9,9 +11,9 @@
 > Sí se incluyen actores externos que, sin usar el sistema, quedan conectados por el
 > circuito del SUA aguas arriba (Vecino solicitante) o aguas abajo (Empresas
 > concesionarias), por ser origen o consecuencia directa de lo que el sistema produce.
- 
+
 ---
- 
+
 ## Vecino solicitante
 **Tipo:** Externo
 **Subtipo:** Usuario indirecto
@@ -23,9 +25,9 @@ clasificado en el SUA, y el sistema lo consulta desde ahí.
 dictaminar — y el destinatario final del servicio: la calidad y el tiempo de respuesta del
 dictamen impactan directamente en la resolución de su problema, aunque él nunca vea el
 sistema en sí.
- 
+
 ---
- 
+
 ## Director administrativo
 **Tipo:** Interno
 **Subtipo:** Propietario del producto
@@ -36,9 +38,9 @@ resolverlos. Es el principal interesado en el dashboard de métricas del sistema
 **Por qué es clave:** Tiene la visión estratégica sobre cómo debe funcionar el proceso de
 dictaminación y aprueba el proyecto; sus decisiones sobre casos excepcionales definen
 reglas que terminan reflejadas en el sistema.
- 
+
 ---
- 
+
 ## Área de Diagramación de Datos
 **Tipo:** Interno
 **Subtipo:** Usuario primario
@@ -49,9 +51,9 @@ operativas sobre reorganización del circuito.
 **Por qué es clave:** Es quien transforma los datos que produce el sistema (dictámenes,
 rutas, métricas) en información de gestión para la Dirección; sin su análisis, el dashboard
 y las métricas del sistema perderían buena parte de su utilidad.
- 
+
 ---
- 
+
 ## Área de Procesamiento de Datos
 **Tipo:** Interno
 **Subtipo:** Usuario indirecto (impactado)
@@ -61,9 +63,9 @@ en papel al sistema. También atendía consultas de vecinos sobre el estado de s
 **Por qué es clave:** No usa el sistema nuevo de forma directa, pero es impactada por él:
 la firma digital y la actualización automática de estado eliminan la tarea manual de
 transcripción papel→digital que antes realizaba, liberando esa carga operativa.
- 
+
 ---
- 
+
 ## Dirección Técnica de Arbolado
 **Tipo:** Interno
 **Subtipo:** Usuario primario
@@ -74,9 +76,9 @@ ubicación) y define la intervención necesaria (poda, extracción, etc.).
 **Por qué es clave:** Es el stakeholder con mayor interés estratégico en el sistema —
 validó el diseño en entrevistas y mesas de trabajo — y su tarea diaria (dictaminar y
 planificar rutas de recorrido) es exactamente lo que el sistema resuelve.
- 
+
 ---
- 
+
 ## Centro de Informática Local (CIL)
 **Tipo:** Interno
 **Subtipo:** Administrador técnico / Soporte técnico
@@ -87,9 +89,9 @@ Administrador dentro del propio sistema.
 **Por qué es clave:** Es una dependencia técnica crítica: sin su intervención el sistema
 no se despliega, no se mantiene y nadie puede acceder a él, ya que es quien gestiona los
 usuarios y permisos.
- 
+
 ---
- 
+
 ## SUA (Sistema Único de Atención)
 **Tipo:** Sistema externo
 **Subtipo:** — (no aplica; es un sistema, no una persona o rol)
@@ -100,9 +102,9 @@ estado una vez firmado el dictamen.
 **Por qué es clave:** Es una dependencia técnica sin la cual el sistema no tiene datos de
 entrada ni forma de reportar sus resultados; toda la lógica de negocio depende de esta
 integración, por eso se implementa desacoplada mediante la interfaz `IReclamoProvider`.
- 
+
 ---
- 
+
 ## Autenticación Institucional
 **Tipo:** Sistema externo
 **Subtipo:** — (no aplica; es un sistema, no una persona o rol)
@@ -111,9 +113,9 @@ institucional) del personal que accede al sistema de dictaminado.
 **Por qué es clave:** Sin su validación, ningún usuario podría iniciar sesión; es una
 dependencia técnica de acceso, por eso también se desacopla mediante la interfaz
 `IAuthProvider`.
- 
+
 ---
- 
+
 ## Empresas concesionarias
 **Tipo:** Externo
 **Subtipo:** Usuario indirecto
@@ -123,9 +125,9 @@ Dirección Técnica no cuenta con recursos propios para ejecutarlas.
 **Por qué es clave:** No interactúan con el sistema de dictaminado en ningún momento,
 pero el contenido técnico del dictamen que este sistema produce (qué intervención
 corresponde) es lo que después, aguas abajo y vía SUA, puede derivar trabajo hacia ellas.
- 
+
 ---
- 
+
 ## Equipo de desarrollo
 **Tipo:** Interno
 **Subtipo:** Desarrolladores y mantenedores
@@ -135,11 +137,11 @@ del prototipo del sistema, incluida la arquitectura desacoplada (interfaces
 **Por qué es clave:** Define las decisiones técnicas y de arquitectura que hacen posible
 integrar el sistema con SUA y Autenticación Institucional en producción sin reescribir la
 lógica de negocio.
- 
+
 ---
- 
+
 ## Tabla resumen
- 
+
 | Stakeholder | Tipo | Subtipo | Nivel de impacto |
 |-------------|------|---------|-------------------|
 | Vecino solicitante | Externo | Usuario indirecto | Medio |
@@ -152,17 +154,27 @@ lógica de negocio.
 | Autenticación Institucional | Sistema externo | — | Alto |
 | Empresas concesionarias | Externo | Usuario indirecto | Medio |
 | Equipo de desarrollo | Interno | Desarrolladores y mantenedores | Alto |
- 
+
 **Criterio usado para Nivel de impacto:** Alto = usa el sistema a diario, decide sobre él,
 o es una dependencia técnica sin la cual el sistema no funciona. Medio = interviene de
 forma indirecta o puntual.
 
+---
+
 ## Modelo de roles y permisos
 
-Se definen tres roles de sistema:
+_No confundir con los stakeholders: estos son los roles **dentro del sistema**, propios
+del software y gestionados por el CIL (ver stakeholder "Centro de Informática Local")._
+
+Se definen cuatro roles de sistema:
 
 | Rol | Descripción | Acceso |
-| --- | --- | --- |
-| **Lector** | Consulta pasiva, sin edición | Solo Home / Dashboard (RF-03, RF-04, RF-05) |
-| **Operario** | Rol operativo pleno | Reclamos sin dictaminar, Emitir dictamen, Rutas eficientes, Urgencia por Tormenta, Dashboard. Dentro de este rol, solo quienes tengan matrícula profesional registrada en su perfil pueden firmar dictámenes (RF-18) |
-| **Administrador** | Personal del CIL | Gestión de usuarios y roles, configuración de conectores/adaptadores externos, parámetros del sistema (umbrales, tiempos, perfiles de distribución), placeholder de certificación de firma digital |
+|---|---|---|
+| **Lector** | Consulta pasiva, sin edición | Dashboard (RF-35, RF-36, RF-37, RF-44), Protocolo por tormenta — solo lectura (RF-38, RF-39, RF-40) |
+| **Operador** | Rol operativo de campo | Ver solicitudes (RF-09 a RF-13), generar y restablecer rutas (RF-14 a RF-19), completar y firmar dictámenes (RF-20 a RF-29), trabajo offline y sincronización (RF-30 a RF-34), Protocolo por tormenta completo (RF-38 a RF-43) |
+| **Jefe** | Supervisión operativa | Mismo acceso que Operador (RF-09 a RF-34, RF-38 a RF-43), más Dashboard (RF-35 a RF-37, RF-44) |
+| **Administrador** | Personal del CIL | Gestión de usuarios y roles (RF-06, RF-07, RF-08), configuración de endpoints/credenciales de conexión con el SUA y la Autenticación Institucional (tarea de despliegue, fuera de los RF), Dashboard (RF-35 a RF-37, RF-44), Protocolo por tormenta — solo lectura (RF-38, RF-39, RF-40) |
+
+El rol **Administrador no tiene acceso a rutas ni a dictaminación**: su función es
+exclusivamente la gestión de usuarios, la configuración externa y la lectura del
+dashboard (ver Alcance, sección 2.5).

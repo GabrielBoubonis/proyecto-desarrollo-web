@@ -1,7 +1,7 @@
 # Requisitos del sistema
-
+ 
 ## Descripción del sistema
-
+ 
 El sistema resuelve la etapa de dictaminación técnica de reclamos de arbolado público,
 una vez que estos ya fueron derivados a la Dirección Técnica de Arbolado dentro del SUA
 (Sistema Único de Atención). Permite a los ingenieros consultar las solicitudes asignadas,
@@ -10,13 +10,11 @@ correspondiente, y sincronizar el resultado con el SUA. También genera un dashb
 seguimiento para la Dirección. Opera como una aplicación web progresiva (PWA) instalable
 en los dispositivos móviles (captores) que la organización provee a los ingenieros, para
 poder trabajar sin conexión en el campo.
-
+ 
 ## Requisitos funcionales
-
-_Agrupados por módulo o área funcional._
-
+ 
 ### Módulo 1 — Autenticación y gestión de usuarios
-
+ 
 | ID | Requisito |
 |----|-----------|
 | RF-01 | El sistema debe permitir el inicio de sesión mediante usuario y contraseña propios, validados contra la base de datos local del sistema. |
@@ -27,9 +25,9 @@ _Agrupados por módulo o área funcional._
 | RF-06 | El sistema debe permitir a un usuario con rol Administrador crear, modificar y dar de baja usuarios, y asignarles un rol (Administrador, Jefe, Operador o Lector). |
 | RF-07 | El sistema debe exigir que la contraseña local cumpla: mínimo 8 caracteres, al menos una mayúscula, una minúscula, un número y un carácter especial. |
 | RF-08 | El sistema debe permitir que un Administrador restablezca (blanquee) la contraseña de un usuario. |
-
+ 
 ### Módulo 2 — Lectura de solicitudes del SUA
-
+ 
 | ID | Requisito |
 |----|-----------|
 | RF-09 | El sistema debe consultar al SUA las solicitudes de tipo "reclamo", subtipo "problema con el arbolado público", derivadas al área "Parques y Paseos – Dirección Técnica", aplicando ese filtro como parámetro de la consulta. |
@@ -37,9 +35,9 @@ _Agrupados por módulo o área funcional._
 | RF-11 | El sistema debe mostrar cada solicitud en uno de tres estados: Pendiente, Dictaminada o Pendiente-revisión. |
 | RF-12 | El sistema debe marcar como Pendiente-revisión a una solicitud que ya tuvo un dictamen y fue re-derivada por Procesamiento de Datos con el mismo Número de SUA-Año. |
 | RF-13 | El sistema debe permitir a cualquier usuario con rol Operador o Jefe visualizar el listado completo de solicitudes pendientes o pendientes-revisión, sin restricción de asignación exclusiva. |
-
+ 
 ### Módulo 3 — Generación de rutas de trabajo
-
+ 
 | ID | Requisito |
 |----|-----------|
 | RF-14 | El sistema debe permitir a un usuario con rol Operador o Jefe generar una ruta de trabajo diaria a partir de las solicitudes pendientes. |
@@ -48,9 +46,9 @@ _Agrupados por módulo o área funcional._
 | RF-17 | El sistema debe liberar automáticamente una solicitud reservada en una ruta cuando: se dictamina, el ingeniero presiona "Restablecer", o son las 18:00 hs del día. |
 | RF-18 | El sistema debe permitir a un ingeniero descartar su ruta completa mediante el botón "Restablecer", liberando las solicitudes no dictaminadas. |
 | RF-19 | El sistema debe requerir conexión a internet para generar o confirmar una ruta (no disponible en modo offline). |
-
+ 
 ### Módulo 4 — Dictaminación
-
+ 
 | ID | Requisito |
 |----|-----------|
 | RF-20 | El sistema debe permitir a un usuario con rol Operador o Jefe completar un dictamen técnico para una solicitud en estado Pendiente o Pendiente-revisión. |
@@ -63,9 +61,9 @@ _Agrupados por módulo o área funcional._
 | RF-27 | El sistema debe conservar un historial de todos los dictámenes emitidos para un mismo caso (Número de SUA-Año), sin sobrescribir los anteriores. |
 | RF-28 | El sistema debe permitir a un ingeniero que dictamina un caso en estado Pendiente-revisión consultar el dictamen anterior (contenido y autor), sin precargarlo en el formulario nuevo. |
 | RF-29 | El sistema debe limitar los datos del vecino visibles a lo estrictamente necesario para el trabajo técnico (ubicación y descripción del reclamo), excluyendo nombre y datos de contacto. |
-
+ 
 ### Módulo 5 — Trabajo sin conexión y sincronización
-
+ 
 | ID | Requisito |
 |----|-----------|
 | RF-30 | El sistema debe estar disponible como PWA instalable en los captores (dispositivos Android provistos por la organización). |
@@ -73,28 +71,41 @@ _Agrupados por módulo o área funcional._
 | RF-32 | El sistema debe guardar localmente en el dispositivo cualquier dictamen firmado sin conexión, en estado "pendiente de sincronizar". |
 | RF-33 | El sistema debe reintentar automáticamente el envío de los dictámenes pendientes de sincronizar en cuanto detecte conexión, sin intervención manual del usuario. |
 | RF-34 | El sistema debe mostrar al ingeniero un indicador permanente del estado de sincronización (todo sincronizado / cantidad de dictámenes pendientes / sin conexión). |
-
+ 
 ### Módulo 6 — Dashboard
-
+ 
 | ID | Requisito |
 |----|-----------|
 | RF-35 | El sistema debe mostrar, para los roles Jefe, Administrador y Lector, la cantidad de solicitudes derivadas a la Dirección Técnica, dictaminadas y sin dictaminar. |
 | RF-36 | El sistema debe permitir filtrar las métricas del dashboard por mes y por año. |
 | RF-37 | El sistema debe contabilizar cada re-derivación de una solicitud (por vencimiento) como un evento independiente en las métricas, aunque corresponda al mismo Número de SUA-Año. |
-
+| RF-44 | El sistema debe incluir las solicitudes de tormenta en las métricas generales del dashboard, y además debe mostrar un desglose separado exclusivo de solicitudes de tormenta. |
+ 
+### Módulo 7 — Protocolo por tormenta
+ 
+| ID | Requisito |
+|----|-----------|
+| RF-38 | El sistema debe permitir a los roles Operador, Jefe, Administrador y Lector visualizar la sección "Protocolo por tormenta", donde se listan exclusivamente las solicitudes derivadas por Procesamiento de Datos con la etiqueta "emergencia por tormenta". |
+| RF-39 | Las solicitudes de tormenta no deben aparecer en el listado general de solicitudes (Módulo 2); solo son visibles dentro de "Protocolo por tormenta". |
+| RF-40 | El sistema debe mostrar un indicador visual animado cuando existan solicitudes de tormenta pendientes, para señalar su máxima prioridad. |
+| RF-41 | El sistema debe permitir a un usuario con rol Operador o Jefe generar una ruta de tormenta indicando únicamente la cantidad de solicitudes a incluir, priorizando siempre las solicitudes más antiguas primero. |
+| RF-42 | Una ruta de tormenta debe respetar las mismas reglas de exclusión y liberación que una ruta normal (RF-16, RF-17). |
+| RF-43 | El dictamen de una solicitud de tormenta debe completarse con el mismo formulario que cualquier otro dictamen (Módulo 4), sin campos adicionales. |
+ 
 ## Requisitos no funcionales
-
+ 
 ### Rendimiento y disponibilidad
-
+ 
 | ID | Requisito |
 |----|-----------|
 | RNF-01 | El sistema debe estar disponible 24/7, salvo ventanas de mantenimiento programadas fuera de la jornada operativa (lunes a sábado, 7 a 17 hs). |
 | RNF-02 | El sistema debe soportar el uso simultáneo de entre 4 y 7 ingenieros sin degradación perceptible del tiempo de respuesta. |
 | RNF-03 | El sistema debe soportar un volumen de al menos 140 dictámenes diarios (aprox. 20 por ingeniero) sin degradación del rendimiento. |
 | RNF-04 | En modo offline, cada solicitud HTTP debe tener un tiempo límite de espera corto (del orden de segundos) para no bloquear la interfaz ante señal intermitente. |
-
+| RNF-15 | El sistema debe soportar la resolución de hasta 100 solicitudes de tormenta dentro de un plazo de 48 horas hábiles, sin degradación del rendimiento. |
+ 
 ### Seguridad y usabilidad
-
+ 
 | ID | Requisito |
 |----|-----------|
 | RNF-05 | La contraseña local debe exigir un mínimo de 8 caracteres, con al menos una mayúscula, una minúscula, un número y un carácter especial. |
@@ -102,18 +113,19 @@ _Agrupados por módulo o área funcional._
 | RNF-07 | El sistema debe usar HTTPS/TLS en todas las comunicaciones con el SUA, la Autenticación Institucional y entre cliente y servidor. |
 | RNF-08 | El sistema debe limitar los datos personales del vecino que consulta y almacena a los estrictamente necesarios para el trabajo técnico. |
 | RNF-09 | La interfaz debe ser utilizable en pantallas de celular (diseño responsive), dado que el ingeniero trabaja desde un captor en el campo. |
-
+ 
 ### Almacenamiento y continuidad
-
+ 
 | ID | Requisito |
 |----|-----------|
 | RNF-10 | Los dictámenes deben conservarse de forma indefinida en la base de datos del sistema, dado su valor de documento legal. |
 | RNF-11 | El sistema debe contar con copias de backup periódicas de la base de datos de dictámenes. |
-
+ 
 ### Plataforma
-
+ 
 | ID | Requisito |
 |----|-----------|
 | RNF-12 | El sistema debe funcionar como PWA instalable en dispositivos Android (captores provistos por la organización). |
 | RNF-13 | El sistema no requiere soporte para iOS, dado que los dispositivos de campo son exclusivamente Android. |
 | RNF-14 | El sistema debe utilizar un servicio de mapas/geolocalización de uso gratuito para la generación de rutas. |
+ 

@@ -134,6 +134,33 @@ seguimiento para la Dirección.
   independiente**, no como un caso único: si un mismo caso ingresó en 2026 y volvió a
   derivarse en 2027, ambos años deben reflejar ese ingreso por separado.
 - El sistema real probablemente requiera métricas adicionales a definir más adelante.
+- Incluye además un desglose exclusivo de solicitudes de tormenta (ver 2.7).
+
+### 2.7 Protocolo por tormenta
+
+- Sección independiente del listado general de solicitudes, donde se visualizan
+  exclusivamente las solicitudes que Procesamiento de Datos deriva con la etiqueta
+  **"emergencia por tormenta"**. Estas solicitudes **no aparecen** en el listado general
+  de Solicitudes (2.2) — solo son visibles dentro de este apartado.
+- Accesible para los cuatro roles, con distinto nivel de interacción:
+  - **Operador y Jefe**: pueden ver las solicitudes de tormenta, generar una ruta de
+    tormenta y dictaminarlas.
+  - **Lector y Administrador**: acceso de solo lectura, igual que al resto del sistema
+    para el Administrador (ver 2.1).
+- La sección muestra un **indicador visual animado** cuando existen solicitudes de
+  tormenta pendientes, para señalar que son la prioridad máxima de dictaminación.
+- La ruta de tormenta se genera indicando únicamente la **cantidad** de solicitudes a
+  incluir (sin los criterios de distrito/prioridad/zona de las rutas normales). El sistema
+  prioriza siempre las solicitudes **más antiguas primero**.
+- Las solicitudes de tormenta, una vez incluidas en una ruta, quedan sujetas a las mismas
+  reglas de exclusión y liberación que las rutas normales (no se repiten entre rutas
+  simultáneas; se liberan al dictaminar, al presionar "Restablecer" o a las 18:00 hs).
+- El dictamen de una solicitud de tormenta se completa con el **mismo formulario** que
+  cualquier otro dictamen, sin campos adicionales.
+- Objetivo operativo: no debería acumularse un atraso mayor a **100 solicitudes de
+  tormenta sin dictaminar dentro de un plazo de 48 horas hábiles**.
+- Las solicitudes de tormenta se incluyen en el dashboard general (2.6) como una solicitud
+  común, y además cuentan con un desglose propio exclusivo de tormenta.
 
 ---
 
