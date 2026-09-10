@@ -1,374 +1,304 @@
 # Historias de usuario
-
 _Presentar al menos una historia de usuario representativa por módulo._
 _Cada historia debe incluir formato clásico, criterios de aceptación y validación INVEST._
 
 ---
 
-## HU-01 — Inicio de sesión institucional
+## HU-01 — Inicio de sesión en el sistema
 
 | Campo | Detalle |
 |-------|---------|
-| Historia | Como ingeniero agrónomo, quiero ingresar con mi usuario y contraseña institucional, para acceder de forma segura al sistema desde mi celular en la calle. |
-| Módulo | Autenticación y acceso |
-| Requisitos relacionados | RF-01, RF-02 |
+| Historia | Como usuario del sistema, quiero iniciar sesión con mi usuario y contraseña, para acceder a las solicitudes y funciones habilitadas para mi rol. |
+| Módulo | Autenticación y gestión de usuarios |
+| Requisitos relacionados | RF-01, RF-02, RF-03, RF-04 |
 
 ### Criterios de aceptación
 
-1. Si las credenciales son válidas, accedo al Home.
-2. Si las credenciales son inválidas, se muestra un mensaje de error.
-3. Sin sesión iniciada, no puedo entrar a ninguna página del sistema.
+1. Dado que ingreso un usuario y contraseña válidos y registrados localmente, cuando envío el formulario de login, el sistema valida contra la Autenticación Institucional y me otorga acceso con un token JWT.
+2. Dado que ingreso una contraseña incorrecta, cuando envío el formulario, el sistema rechaza el acceso y muestra un mensaje de error genérico, sin indicar si el usuario existe o no.
+3. Dado que mi usuario no existe en la base local del sistema, cuando intento iniciar sesión, el sistema rechaza el acceso aunque mis credenciales sean válidas en la Autenticación Institucional.
+4. Dado que inicié sesión correctamente, cuando pasan 30 minutos sin que interactúe con el sistema, mi sesión se cierra automáticamente.
 
 ### Validación INVEST
 
 | Criterio | ¿Se cumple? | Observación |
 |----------|-------------|-------------|
-| Independiente | Sí | |
+| Independiente | Parcial | Es la base de la que dependen el resto de las historias (nadie puede dictaminar ni generar rutas sin loguearse antes). Es una dependencia estructural típica del módulo, no una dependencia de negocio arbitraria. |
+| Negociable | Sí | El mecanismo interno de validación (JWT, API key) puede ajustarse sin cambiar el valor entregado al usuario. |
+| Valiosa | Sí | Sin esto, ningún otro módulo del sistema es accesible. |
+| Estimable | Sí | El equipo cuenta con la información necesaria para dimensionar el esfuerzo. |
+| Pequeña | Sí | Se resuelve en un sprint corto. |
+| Verificable | Sí | Cada criterio de aceptación es un caso de prueba concreto. |
+
+---
+
+## HU-02 — Gestión de usuarios y roles
+
+| Campo | Detalle |
+|-------|---------|
+| Historia | Como Administrador, quiero crear, modificar y dar de baja usuarios del sistema y asignarles un rol, para controlar quién puede acceder y qué puede hacer cada persona. |
+| Módulo | Autenticación y gestión de usuarios |
+| Requisitos relacionados | RF-06, RF-07, RF-08 |
+
+### Criterios de aceptación
+
+1. Dado que soy Administrador, cuando creo un nuevo usuario con una contraseña que cumple los requisitos de complejidad (8 caracteres, mayúscula, minúscula, número y carácter especial), el sistema lo da de alta y le asigna el rol seleccionado (Administrador, Jefe, Operador o Lector).
+2. Dado que intento crear un usuario con una contraseña que no cumple los requisitos de complejidad, el sistema rechaza la creación e indica qué requisito falta.
+3. Dado que un usuario existente perdió su contraseña, cuando la restablezco desde mi panel de Administrador, el sistema genera una nueva contraseña y desactiva la anterior.
+4. Dado que doy de baja un usuario, cuando esa persona intenta iniciar sesión, el sistema le niega el acceso.
+
+### Validación INVEST
+
+| Criterio | ¿Se cumple? | Observación |
+|----------|-------------|-------------|
+| Independiente | Sí | Puede desarrollarse y probarse sin depender de otras historias funcionales del sistema (más allá del login propio del Administrador). |
 | Negociable | Sí | |
-| Valiosa | Sí | |
+| Valiosa | Sí | Sin esto no hay forma de dar de alta a nadie más en el sistema. |
 | Estimable | Sí | |
 | Pequeña | Sí | |
 | Verificable | Sí | |
 
 ---
 
-## HU-02 — Métricas y estado general en el Home
+## HU-03 — Consultar solicitudes derivadas a la Dirección Técnica
 
 | Campo | Detalle |
 |-------|---------|
-| Historia | Como ingeniero agrónomo, quiero ver al entrar cuántos reclamos hay ingresados, sin dictaminar y dictaminados, para saber de un vistazo cómo viene la carga de trabajo. |
-| Módulo | Home / Dashboard |
-| Requisitos relacionados | RF-03, RF-04, RF-05 |
+| Historia | Como Operador, quiero ver el listado de solicitudes derivadas a la Dirección Técnica de Arbolado, para saber qué casos tengo disponibles para dictaminar. |
+| Módulo | Lectura de solicitudes del SUA |
+| Requisitos relacionados | RF-09, RF-10, RF-11, RF-13 |
 
 ### Criterios de aceptación
 
-1. El Home muestra las tres cifras (ingresados, sin dictaminar, dictaminados).
-2. Se muestra un gráfico de reclamos pendientes agrupado por prioridad.
-3. Se muestran los dictámenes próximos a vencer y un aviso de casos de tormenta.
+1. Dado que inicié sesión, cuando accedo al listado de solicitudes, el sistema muestra únicamente las de tipo reclamo, subtipo "problema con el arbolado público", derivadas a Parques y Paseos – Dirección Técnica.
+2. Cada solicitud del listado muestra su identificador (Número de SUA - Año) y su estado actual (Pendiente, Dictaminada o Pendiente-revisión).
+3. Dado que soy Operador o Jefe, puedo ver todas las solicitudes pendientes y pendientes-revisión, sin que estén restringidas a un ingeniero en particular.
 
 ### Validación INVEST
 
 | Criterio | ¿Se cumple? | Observación |
 |----------|-------------|-------------|
-| Independiente | Sí | |
+| Independiente | Parcial | Depende de que exista un login previo (HU-01). Es una dependencia estructural, no de negocio. |
 | Negociable | Sí | |
-| Valiosa | Sí | |
-| Estimable | Sí | |
-| Pequeña | Parcial | Agrupa métricas + gráficos + alertas en una sola historia; podría dividirse en 2-3 HU más chicas. |
-| Verificable | Sí | |
-
----
-
-## HU-03 — Listado de reclamos priorizado
-
-| Campo | Detalle |
-|-------|---------|
-| Historia | Como ingeniero agrónomo, quiero ver la lista de reclamos pendientes ordenados por urgencia, para atender primero los más peligrosos. |
-| Módulo | Reclamos sin dictaminar |
-| Requisitos relacionados | RF-07, RF-08, RF-09 |
-
-### Criterios de aceptación
-
-1. Solo se listan reclamos asignados a la Dirección Técnica y en estado "sin dictaminar".
-2. El listado se ordena de urgente a baja por defecto.
-3. Es filtrable por zona, prioridad, tipo de intervención y antigüedad.
-
-### Validación INVEST
-
-| Criterio | ¿Se cumple? | Observación |
-|----------|-------------|-------------|
-| Independiente | Sí | |
-| Negociable | Sí | |
-| Valiosa | Sí | |
+| Valiosa | Sí | Es el punto de partida del trabajo diario del ingeniero. |
 | Estimable | Sí | |
 | Pequeña | Sí | |
 | Verificable | Sí | |
 
 ---
 
-## HU-04 — Consulta de N.° SUA y año en la ruta
+## HU-04 — Generar ruta de trabajo diaria
 
 | Campo | Detalle |
 |-------|---------|
-| Historia | Como ingeniero agrónomo, quiero consultar el número de SUA y el año de cada reclamo de mi ruta, para anotarlos y poder dictaminarlos después en el formulario. |
-| Módulo | Rutas eficientes |
-| Requisitos relacionados | RF-27 |
+| Historia | Como Operador, quiero generar una ruta de trabajo con los criterios que yo elija, para organizar mi jornada de forma eficiente según cómo prefiero trabajar. |
+| Módulo | Generación de rutas de trabajo |
+| Requisitos relacionados | RF-14, RF-15, RF-16, RF-19 |
 
 ### Criterios de aceptación
 
-1. Desde la página de rutas puedo ver el N.° de SUA y el año de cada caso asignado.
+1. Dado que tengo conexión a internet, cuando presiono "Generar ruta" definiendo una combinación de distrito, prioridad y/o una zona en el mapa, el sistema arma una ruta con las solicitudes pendientes que cumplen esos criterios.
+2. Dado que una solicitud ya forma parte de la ruta activa de otro ingeniero, esa solicitud no aparece disponible para incluirse en mi nueva ruta.
+3. Dado que no tengo conexión a internet, cuando intento generar una ruta, el sistema no permite la operación e informa que se necesita conexión.
+4. Dado que elijo no filtrar por distrito, el sistema igual arma la ruta considerando el resto de los criterios seleccionados.
 
 ### Validación INVEST
 
 | Criterio | ¿Se cumple? | Observación |
 |----------|-------------|-------------|
-| Independiente | Sí | |
+| Independiente | Parcial | Depende de HU-03 (ver solicitudes) y de HU-01 (login). Dependencia esperable dentro del flujo del sistema. |
+| Negociable | Sí | El algoritmo de optimización puede ajustarse sin cambiar el valor de la historia. |
+| Valiosa | Sí | |
+| Estimable | Parcial | El algoritmo de armado de ruta puede requerir un análisis técnico previo antes de poder estimarse con precisión. |
+| Pequeña | No del todo | Combina varios criterios de filtrado con selección manual en mapa, lo que la hace más grande que el resto de las historias. Podría dividirse por criterio si el equipo lo prefiere. |
+| Verificable | Sí | |
+
+---
+
+## HU-05 — Restablecer ruta de trabajo
+
+| Campo | Detalle |
+|-------|---------|
+| Historia | Como Operador, quiero poder descartar mi ruta actual y generar una nueva, para adaptarme si cambian las prioridades durante el día. |
+| Módulo | Generación de rutas de trabajo |
+| Requisitos relacionados | RF-17, RF-18 |
+
+### Criterios de aceptación
+
+1. Dado que tengo una ruta activa con solicitudes sin dictaminar, cuando presiono "Restablecer", el sistema descarta la ruta y libera esas solicitudes para que puedan incluirse en otras rutas.
+2. Dado que ya dictaminé algunas solicitudes de mi ruta, esas no vuelven a aparecer como disponibles al restablecer, porque ya no están pendientes.
+3. Dado que no presiono "Restablecer" ni dictamino todos los casos, cuando llegan las 18:00 hs, el sistema libera automáticamente las solicitudes no dictaminadas de mi ruta.
+
+### Validación INVEST
+
+| Criterio | ¿Se cumple? | Observación |
+|----------|-------------|-------------|
+| Independiente | No | Depende directamente de HU-04 (no existe ruta para restablecer si no se generó antes). Se podría fusionar con HU-04 si el equipo prefiere una sola historia de "gestión de ruta". |
 | Negociable | Sí | |
-| Valiosa | Parcial | Valor bajo tomada de forma aislada; podría fusionarse como criterio de aceptación de HU-09. |
+| Valiosa | Sí | Evita que un caso quede bloqueado indefinidamente para los demás ingenieros. |
 | Estimable | Sí | |
 | Pequeña | Sí | |
 | Verificable | Sí | |
 
 ---
 
-## HU-05 — Carga del dictamen desde el celular
+## HU-06 — Completar y firmar un dictamen técnico
 
 | Campo | Detalle |
 |-------|---------|
-| Historia | Como ingeniero agrónomo, quiero completar el dictamen desde el celular frente al árbol, para no volver a la oficina a cargarlo a mano. |
-| Módulo | Realizar dictamen técnico |
-| Requisitos relacionados | RF-12, RF-13, RF-14, RF-17 |
+| Historia | Como Operador, quiero completar y firmar digitalmente el dictamen técnico de una solicitud, para dejar registrada la intervención que corresponde sobre el ejemplar. |
+| Módulo | Dictaminación |
+| Requisitos relacionados | RF-20, RF-21, RF-22, RF-23, RF-24, RF-29 |
 
 ### Criterios de aceptación
 
-1. Primero ingreso N.° de SUA y año.
-2. El sistema verifica que el reclamo exista y esté sin dictaminar.
-3. Completo los datos del ejemplar, tipo de intervención, fotos y observaciones.
+1. Dado que abro una solicitud en estado Pendiente o Pendiente-revisión, cuando completo el formulario del dictamen y lo envío, el sistema lo firma digitalmente con hash, timestamp y mi usuario, y lo guarda en la base de datos propia.
+2. Dado que otro ingeniero envía un dictamen para el mismo caso antes que yo, cuando intento enviar el mío, el sistema rechaza mi envío indicando que el caso ya fue dictaminado.
+3. Dado que el dictamen se firmó correctamente, el sistema envía al SUA el subconjunto de campos correspondiente a los "datos complementarios de la solicitud".
+4. El formulario del dictamen no muestra nombre ni datos de contacto del vecino, solo la información técnica necesaria (ubicación, descripción del reclamo).
 
 ### Validación INVEST
 
 | Criterio | ¿Se cumple? | Observación |
 |----------|-------------|-------------|
-| Independiente | Sí | |
+| Independiente | Parcial | Depende de HU-03/HU-04 (tener el caso disponible) y de HU-01 (login). Dependencia esperable del flujo. |
 | Negociable | Sí | |
-| Valiosa | Sí | |
-| Estimable | Parcial | |
-| Pequeña | Parcial | Historia "paraguas"; conviene dividir en sub-HU (datos del ejemplar, tipo de intervención, adjuntos). |
+| Valiosa | Sí | Es la funcionalidad central del sistema. |
+| Estimable | Sí | |
+| Pequeña | No del todo | Agrupa firma digital, persistencia local y envío al SUA en una sola historia. Podría dividirse en "completar y firmar" vs. "enviar al SUA" si el equipo prefiere historias más chicas. |
 | Verificable | Sí | |
 
 ---
 
-## HU-06 — Bloqueo de intervenciones contradictorias
+## HU-07 — Descargar el dictamen como documento imprimible
 
 | Campo | Detalle |
 |-------|---------|
-| Historia | Como ingeniero agrónomo, quiero que el sistema me impida cargar intervenciones contradictorias, para no generar un dictamen incoherente. |
-| Módulo | Realizar dictamen técnico |
-| Requisitos relacionados | RF-14 |
+| Historia | Como Operador, quiero descargar el dictamen firmado en formato PDF, para poder imprimirlo como documento legal cuando sea necesario. |
+| Módulo | Dictaminación |
+| Requisitos relacionados | RF-26 |
 
 ### Criterios de aceptación
 
-1. Al elegir extracción, se bloquean poda y corte de raíces (y viceversa).
-2. No puedo confirmar el dictamen hasta resolver la inconsistencia.
+1. Dado que un dictamen ya fue firmado, cuando presiono "Descargar", el sistema genera un archivo PDF con el contenido completo del dictamen.
+2. El PDF incluye los datos de la firma digital (hash, timestamp, usuario).
+3. La descarga está disponible tanto para dictámenes recién firmados como para cualquiera del historial.
 
 ### Validación INVEST
 
 | Criterio | ¿Se cumple? | Observación |
 |----------|-------------|-------------|
-| Independiente | Sí | |
+| Independiente | Sí | Puede desarrollarse una vez que existe un dictamen firmado, sin acoplarse al resto de la lógica de negocio. |
 | Negociable | Sí | |
-| Valiosa | Sí | |
+| Valiosa | Sí | Resuelve una necesidad operativa concreta: el documento legal impreso. |
 | Estimable | Sí | |
 | Pequeña | Sí | |
 | Verificable | Sí | |
 
 ---
 
-## HU-07 — Época recomendada de intervención
+## HU-08 — Consultar el dictamen anterior de un caso re-derivado
 
 | Campo | Detalle |
 |-------|---------|
-| Historia | Como ingeniero agrónomo, quiero que el sistema tenga en cuenta la estación del año y la especie, para programar intervenciones en el momento más conveniente para el ejemplar. |
-| Módulo | Realizar dictamen técnico |
-| Requisitos relacionados | RF-16 |
+| Historia | Como Operador, quiero poder consultar el dictamen anterior de un caso en estado Pendiente-revisión, para tener contexto de lo que se evaluó la vez pasada antes de completar el nuevo. |
+| Módulo | Dictaminación |
+| Requisitos relacionados | RF-27, RF-28 |
 
 ### Criterios de aceptación
 
-1. El dictamen registra/sugiere la época recomendada según especie y estación.
-2. Esa época queda disponible como criterio al planificar la ruta.
+1. Dado que abro un caso en estado Pendiente-revisión, el formulario del nuevo dictamen se presenta en blanco, sin datos precargados del anterior.
+2. Dado que quiero ver qué se dictaminó antes, cuando presiono el botón "Ver dictamen anterior", el sistema me muestra su contenido completo y quién lo firmó.
+3. El sistema conserva todos los dictámenes históricos de un mismo caso, sin sobrescribirlos entre sí.
 
 ### Validación INVEST
 
 | Criterio | ¿Se cumple? | Observación |
 |----------|-------------|-------------|
-| Independiente | Sí | |
+| Independiente | Parcial | Depende de que exista al menos un dictamen previo del caso (HU-06). Es una dependencia de datos, no de desarrollo. |
 | Negociable | Sí | |
-| Valiosa | Parcial | Valor secundario: es una sugerencia, no un paso bloqueante; de todos modos la historia es válida. |
+| Valiosa | Sí | Da contexto al ingeniero y evita desconocer el historial del ejemplar. |
 | Estimable | Sí | |
 | Pequeña | Sí | |
 | Verificable | Sí | |
 
 ---
 
-## HU-08 — Firma digital del dictamen
+## HU-09 — Dictaminar sin conexión a internet
 
 | Campo | Detalle |
 |-------|---------|
-| Historia | Como ingeniero agrónomo, quiero firmar digitalmente el dictamen, para que quede como documento válido e inalterable. |
-| Módulo | Realizar dictamen técnico |
-| Requisitos relacionados | RF-18, RF-19, RF-20 |
+| Historia | Como Operador, quiero poder completar y firmar un dictamen aunque no tenga señal en el lugar donde estoy, para no depender de la conectividad del momento para hacer mi trabajo. |
+| Módulo | Trabajo sin conexión y sincronización |
+| Requisitos relacionados | RF-30, RF-31, RF-32 |
 
 ### Criterios de aceptación
 
-1. Necesito tener matrícula registrada para poder firmar.
-2. Tras firmar, el dictamen queda en solo lectura (inmutable).
-3. Se guarda fecha, matrícula y hash, y se calcula el vencimiento a 18 meses.
+1. Dado que tengo la app instalada como PWA en mi captor y ya generé mi ruta con conexión, cuando pierdo la señal, puedo seguir abriendo los casos de mi ruta y completar el dictamen normalmente.
+2. Dado que firmo un dictamen sin conexión, el sistema lo guarda localmente en el dispositivo con estado "pendiente de sincronizar".
+3. Dado que intento generar una ruta nueva sin conexión, el sistema no lo permite, ya que esa acción requiere conexión.
 
 ### Validación INVEST
 
 | Criterio | ¿Se cumple? | Observación |
 |----------|-------------|-------------|
-| Independiente | Sí | |
+| Independiente | Parcial | Depende de HU-04 (ruta generada con conexión previa) y de HU-06 (lógica de completar/firmar dictamen). |
 | Negociable | Sí | |
-| Valiosa | Sí | |
+| Valiosa | Sí | Es una necesidad real del trabajo de campo, no una mejora accesoria. |
+| Estimable | Parcial | Depende de decisiones técnicas de almacenamiento local (Service Worker, IndexedDB) que pueden requerir un análisis previo. |
+| Pequeña | Sí | Dentro de lo que permite el alcance offline definido. |
+| Verificable | Sí | |
+
+---
+
+## HU-10 — Sincronización automática de dictámenes pendientes
+
+| Campo | Detalle |
+|-------|---------|
+| Historia | Como Operador, quiero que los dictámenes que quedaron pendientes de enviar se sincronicen solos apenas recupero señal, para no tener que acordarme de reenviarlos manualmente. |
+| Módulo | Trabajo sin conexión y sincronización |
+| Requisitos relacionados | RF-25, RF-33, RF-34 |
+
+### Criterios de aceptación
+
+1. Dado que tengo dictámenes en estado "pendiente de sincronizar", cuando el dispositivo recupera conexión, el sistema los envía automáticamente al SUA sin intervención manual.
+2. Dado que el envío al SUA falla (por ejemplo, el SUA está caído), el sistema mantiene el dictamen en estado "pendiente de sincronizar" y reintenta más adelante.
+3. En todo momento puedo ver un indicador que muestra si está todo sincronizado, cuántos dictámenes tengo pendientes, o si no tengo conexión.
+
+### Validación INVEST
+
+| Criterio | ¿Se cumple? | Observación |
+|----------|-------------|-------------|
+| Independiente | Parcial | Depende de HU-09 (que existan dictámenes offline para sincronizar). Son dos caras del mismo flujo, separadas para que cada una sea más chica y verificable por separado. |
+| Negociable | Sí | |
+| Valiosa | Sí | Sin esto, el trabajo offline no se traduce nunca en datos reales en el SUA. |
 | Estimable | Sí | |
 | Pequeña | Sí | |
 | Verificable | Sí | |
 
 ---
 
-## HU-09 — Planificación de ruta eficiente
+## HU-11 — Consultar métricas de dictaminación en el dashboard
 
 | Campo | Detalle |
 |-------|---------|
-| Historia | Como ingeniero agrónomo, quiero que el sistema me arme la ruta más eficiente según una zona y mis horas o cantidad de casos, para perder menos tiempo viajando y dictaminar más. |
-| Módulo | Rutas eficientes |
-| Requisitos relacionados | RF-21, RF-22, RF-26 |
+| Historia | Como Jefe, quiero ver un dashboard con la cantidad de solicitudes derivadas, dictaminadas y sin dictaminar, para hacer seguimiento del trabajo del equipo por período. |
+| Módulo | Dashboard |
+| Requisitos relacionados | RF-35, RF-36, RF-37 |
 
 ### Criterios de aceptación
 
-1. Elijo zona, planifico por horas o por cantidad de casos, y elijo modo de traslado.
-2. El cálculo usa 10 min por dictamen (parámetro configurable).
-3. La ruta parte y vuelve a Parques y Paseos; veo mapa, cronograma y % de eficiencia.
+1. Dado que accedo al dashboard, el sistema muestra la cantidad de solicitudes derivadas, dictaminadas y sin dictaminar.
+2. Puedo filtrar esas métricas por mes y por año.
+3. Dado que un caso fue re-derivado por vencimiento, ese evento se cuenta de forma independiente en las métricas del período en que ocurrió, aunque corresponda a un caso ya contado antes.
 
 ### Validación INVEST
 
 | Criterio | ¿Se cumple? | Observación |
 |----------|-------------|-------------|
-| Independiente | Sí | |
+| Independiente | Parcial | Depende de que existan datos generados por los módulos de solicitudes y dictaminación. Es una dependencia de datos, no de desarrollo del propio módulo. |
 | Negociable | Sí | |
-| Valiosa | Sí | |
-| Estimable | Parcial | |
-| Pequeña | Parcial | Complejidad algorítmica alta; conviene un spike técnico antes de estimar. |
-| Verificable | Sí | |
-
----
-
-## HU-10 — Elección de modo de traslado
-
-| Campo | Detalle |
-|-------|---------|
-| Historia | Como ingeniero agrónomo, quiero elegir entre auto, a pie o bicicleta, para adaptar la jornada a la concentración de reclamos, priorizando la eficiencia del recorrido. |
-| Módulo | Rutas eficientes |
-| Requisitos relacionados | RF-22 |
-
-### Criterios de aceptación
-
-1. En cualquier modo de traslado elegido, el sistema optimiza la ruta por tiempo total.
-
-### Validación INVEST
-
-| Criterio | ¿Se cumple? | Observación |
-|----------|-------------|-------------|
-| Independiente | Parcial | Depende de HU-09 (no se puede probar de forma aislada). |
-| Negociable | Sí | |
-| Valiosa | Sí | |
+| Valiosa | Sí | Es la herramienta de seguimiento para la Dirección. |
 | Estimable | Sí | |
 | Pequeña | Sí | |
 | Verificable | Sí | |
-
----
-
-## HU-11 — Casos de tormenta
-
-| Campo | Detalle |
-|-------|---------|
-| Historia | Como ingeniero agrónomo, quiero ver aparte los casos de tormenta de los últimos días, para responder a la emergencia con una ruta de mínima distancia. |
-| Módulo | Urgencia por Tormenta |
-| Requisitos relacionados | RF-28, RF-29, RF-30 |
-
-### Criterios de aceptación
-
-1. La sección aparece solo si hay casos etiquetados como tormenta.
-2. Todos los casos se tratan con igual urgencia.
-3. Se genera una ruta de mínima distancia; el badge indica cuántos casos hay.
-
-### Validación INVEST
-
-| Criterio | ¿Se cumple? | Observación |
-|----------|-------------|-------------|
-| Independiente | Sí | |
-| Negociable | Sí | |
-| Valiosa | Sí | |
-| Estimable | Sí | |
-| Pequeña | Sí | |
-| Verificable | Sí | |
-
----
-
-## HU-12 — Balanceador de carga por prioridad
-
-| Campo | Detalle |
-|-------|---------|
-| Historia | Como jefe de la Dirección Técnica, quiero usar un balanceador para fijar qué proporción de cada prioridad se dictamina por sesión, para orientar el trabajo según la estrategia del momento. |
-| Módulo | Rutas eficientes (balanceador de carga) |
-| Requisitos relacionados | RF-23, RF-25 |
-
-### Criterios de aceptación
-
-1. Ajusto porcentajes por prioridad con controles deslizables.
-2. Si falta stock de una prioridad, el sistema redistribuye automáticamente.
-
-### Validación INVEST
-
-| Criterio | ¿Se cumple? | Observación |
-|----------|-------------|-------------|
-| Independiente | Sí | |
-| Negociable | Sí | |
-| Valiosa | Sí | |
-| Estimable | Parcial | |
-| Pequeña | Parcial | Podría dividirse en "ajustar porcentajes" y "modos predefinidos". |
-| Verificable | Sí | |
-
----
-
-## HU-13 — Perfiles de distribución (bajada de línea)
-
-| Campo | Detalle |
-|-------|---------|
-| Historia | Como jefe de la Dirección Técnica, quiero configurar rápido un perfil de distribución cuando hay una directiva superior, para responder a una política puntual (ej. no dejar ningún caso urgente pendiente). |
-| Módulo | Rutas eficientes (balanceador de carga) |
-| Requisitos relacionados | RF-24 |
-
-### Criterios de aceptación
-
-1. Puedo asignar el 100% de la jornada a una sola prioridad en pocos pasos.
-2. Puedo guardar y reutilizar perfiles de distribución.
-
-### Validación INVEST
-
-| Criterio | ¿Se cumple? | Observación |
-|----------|-------------|-------------|
-| Independiente | Parcial | Depende de HU-12 (reutiliza el balanceador). |
-| Negociable | Sí | |
-| Valiosa | Sí | |
-| Estimable | Sí | |
-| Pequeña | Sí | |
-| Verificable | Sí | |
-
----
-
-## HU-14 — Visibilidad de reclamos derivados
-
-| Campo | Detalle |
-|-------|---------|
-| Historia | Como área de Procesamiento de Datos, quiero que los reclamos que derivó (normales o con etiqueta de tormenta) aparezcan en el sistema, para que los ingenieros puedan trabajarlos. |
-| Módulo | Reclamos sin dictaminar / Urgencia por Tormenta |
-| Requisitos relacionados | RF-07, RF-28 |
-
-### Criterios de aceptación
-
-1. Los reclamos derivados normales se listan como "sin dictaminar".
-2. Los reclamos derivados con etiqueta de tormenta van a la sección de urgencia.
-3. El sistema no genera reclamos propios, solo consume los derivados del SUA.
-
-### Validación INVEST
-
-| Criterio | ¿Se cumple? | Observación |
-|----------|-------------|-------------|
-| Independiente | Sí | |
-| Negociable | Sí | |
-| Valiosa | Sí | |
-| Estimable | Sí | |
-| Pequeña | Sí | |
-| Verificable | Parcial | Criterio de aceptación algo genérico ("para que puedan trabajarlos"); conviene precisar qué campos deben llegar completos. |
