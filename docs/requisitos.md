@@ -1,118 +1,119 @@
-# Requerimientos funcionales y no funcionales
+# Requisitos del sistema
 
-## Contexto y decisiones de diseño relevantes
+## Descripción del sistema
 
-La Dirección General de Parques y Paseos enfrenta un alto volumen de solicitudes
-acumuladas en el SUA, con expedientes de más de tres años de antigüedad. El SUA es un
-sistema macro de toda la Municipalidad, por lo que no cubre las particularidades operativas
-de la gestión forestal. El presente proyecto no pretende ser una solución integral, sino una
-herramienta técnica complementaria que ataca tres cuellos de botella:
+El sistema resuelve la etapa de dictaminación técnica de reclamos de arbolado público,
+una vez que estos ya fueron derivados a la Dirección Técnica de Arbolado dentro del SUA
+(Sistema Único de Atención). Permite a los ingenieros consultar las solicitudes asignadas,
+armar una ruta de trabajo diaria, completar y firmar digitalmente el dictamen técnico
+correspondiente, y sincronizar el resultado con el SUA. También genera un dashboard de
+seguimiento para la Dirección. Opera como una aplicación web progresiva (PWA) instalable
+en los dispositivos móviles (captores) que la organización provee a los ingenieros, para
+poder trabajar sin conexión en el campo.
 
-- **Optimización de recursos y tiempos de campo:** rutas eficientes para reducir traslados.
-- **Eliminación del cuello de botella administrativo:** validación digital que evita
-  transcribir manualmente del papel al software.
-- **Sustentabilidad y despapelización:** procesos virtuales sin archivos físicos.
+## Requisitos funcionales
 
-### Decisiones de arquitectura y diseño técnico
+_Agrupados por módulo o área funcional._
 
-- **Firma digital:** módulo de firma digital para los profesionales autorizados,
-  reemplazando la firma hológrafa en papel.
-- **Autenticación centralizada:** el acceso se acopla a la cuenta institucional existente,
-  delegando la gestión de usuarios a la infraestructura actual.
-- **Integración con SUA:** el sistema no define un modelo de datos propio para los reclamos;
-  consume la base del SUA aplicando un filtro que extrae únicamente "Reclamo - Problemas
-  con el arbolado público".
-- **Heterogeneidad en la información de entrada:** la UI debe ser flexible ante reclamos con
-  distinta cantidad y calidad de datos (fotos, descripciones).
-- **Desacoplamiento y mantenibilidad:** la lógica de negocio se mantiene aislada de los
-  proveedores tecnológicos del SUA y del sistema de autenticación, mediante adaptadores.
-  Debido a la falta de acceso a endpoints y credenciales de producción, el prototipo usa
-  Supabase como reemplazo temporal; el pase a producción solo requiere reconfigurar esos
-  dos conectores.
+### Módulo 1 — Autenticación y gestión de usuarios
 
-## Requerimientos funcionales
+| ID | Requisito |
+|----|-----------|
+| RF-01 | El sistema debe permitir el inicio de sesión mediante usuario y contraseña propios, validados contra la base de datos local del sistema. |
+| RF-02 | Si las credenciales locales son válidas, el sistema debe validar el usuario contra la Autenticación Institucional (usuario + API key propia del sistema) y obtener un token JWT. |
+| RF-03 | El sistema debe rechazar el inicio de sesión si el usuario no existe en la base local, aunque exista en la Autenticación Institucional. |
+| RF-04 | El sistema debe cerrar la sesión automáticamente luego de 30 minutos sin interacción del usuario. |
+| RF-05 | El sistema debe renovar la sesión mediante refresh token mientras haya actividad, sin requerir reingresar credenciales. |
+| RF-06 | El sistema debe permitir a un usuario con rol Administrador crear, modificar y dar de baja usuarios, y asignarles un rol (Administrador, Jefe, Operador o Lector). |
+| RF-07 | El sistema debe exigir que la contraseña local cumpla: mínimo 8 caracteres, al menos una mayúscula, una minúscula, un número y un carácter especial. |
+| RF-08 | El sistema debe permitir que un Administrador restablezca (blanquee) la contraseña de un usuario. |
 
-### Autenticación y acceso
+### Módulo 2 — Lectura de solicitudes del SUA
 
-| ID | Descripción | Prioridad |
-| --- | --- | --- |
-| RF-01 | Autenticar al usuario con credenciales institucionales: validar usuario y contraseña, generar token de sesión (JWT), rechazar acceso sin token vigente y mostrar mensaje de error genérico ante credenciales incorrectas. | Alta |
-| RF-02 | Gestionar sesión y permisos por rol (Lector, Operario, Administrador). Solo los Operarios con matrícula registrada pueden firmar dictámenes (RF-18). Permitir cerrar sesión invalidando el token. | Alta |
+| ID | Requisito |
+|----|-----------|
+| RF-09 | El sistema debe consultar al SUA las solicitudes de tipo "reclamo", subtipo "problema con el arbolado público", derivadas al área "Parques y Paseos – Dirección Técnica", aplicando ese filtro como parámetro de la consulta. |
+| RF-10 | El sistema debe identificar cada solicitud de forma única mediante el Número de SUA - Año. |
+| RF-11 | El sistema debe mostrar cada solicitud en uno de tres estados: Pendiente, Dictaminada o Pendiente-revisión. |
+| RF-12 | El sistema debe marcar como Pendiente-revisión a una solicitud que ya tuvo un dictamen y fue re-derivada por Procesamiento de Datos con el mismo Número de SUA-Año. |
+| RF-13 | El sistema debe permitir a cualquier usuario con rol Operador o Jefe visualizar el listado completo de solicitudes pendientes o pendientes-revisión, sin restricción de asignación exclusiva. |
 
-### Home / Dashboard
+### Módulo 3 — Generación de rutas de trabajo
 
-| ID | Descripción | Prioridad |
-| --- | --- | --- |
-| RF-03 | Mostrar tres métricas actualizadas: total de reclamos, sin dictaminar y dictaminados. | Alta |
-| RF-04 | Mostrar gráfico de barras de pendientes por prioridad (verde/amarillo/naranja/rojo) y distribución por distrito/zona. | Media |
-| RF-05 | Mostrar alertas operativas: dictámenes próximos a vencer (≤30 días de los 18 meses) y badge de casos "Protocolo Tormenta". | Media |
-| RF-06 | Ofrecer accesos directos a Reclamos sin dictaminar, Realizar dictamen y Rutas eficientes. | Baja |
+| ID | Requisito |
+|----|-----------|
+| RF-14 | El sistema debe permitir a un usuario con rol Operador o Jefe generar una ruta de trabajo diaria a partir de las solicitudes pendientes. |
+| RF-15 | El sistema debe permitir combinar los siguientes criterios para armar la ruta: cantidad/porcentaje por distrito (opcional), cantidad por nivel de prioridad, selección manual de una zona en el mapa. |
+| RF-16 | El sistema debe excluir de una ruta nueva las solicitudes que ya forman parte de la ruta activa de otro ingeniero. |
+| RF-17 | El sistema debe liberar automáticamente una solicitud reservada en una ruta cuando: se dictamina, el ingeniero presiona "Restablecer", o son las 18:00 hs del día. |
+| RF-18 | El sistema debe permitir a un ingeniero descartar su ruta completa mediante el botón "Restablecer", liberando las solicitudes no dictaminadas. |
+| RF-19 | El sistema debe requerir conexión a internet para generar o confirmar una ruta (no disponible en modo offline). |
 
-### Reclamos sin dictaminar
+### Módulo 4 — Dictaminación
 
-| ID | Descripción | Prioridad |
-| --- | --- | --- |
-| RF-07 | Listar solo los reclamos asignados a la Dirección Técnica en estado "sin dictaminar", ordenados por prioridad descendente. | Alta |
-| RF-08 | Mostrar por reclamo: N.° SUA, año, dirección, descripción, prioridad, fecha de ingreso y foto (si existe). | Alta |
-| RF-09 | Permitir filtrar por prioridad, zona/distrito, tipo de intervención y antigüedad, de forma combinable. | Media |
-| RF-10 | Permitir iniciar el dictamen desde la tarjeta del reclamo ("Dictaminar este reclamo"). | Alta |
-| RF-11 | Recalcular y elevar automáticamente la prioridad según escalamiento por tiempo (verde→amarillo→naranja→rojo), con umbrales configurables. | Media |
+| ID | Requisito |
+|----|-----------|
+| RF-20 | El sistema debe permitir a un usuario con rol Operador o Jefe completar un dictamen técnico para una solicitud en estado Pendiente o Pendiente-revisión. |
+| RF-21 | El sistema debe impedir que exista más de un dictamen activo para el mismo ejemplar: ante dos envíos simultáneos para el mismo caso, debe aceptar el primero y rechazar el segundo. |
+| RF-22 | El sistema debe firmar digitalmente cada dictamen con hash, timestamp y el usuario que lo generó (identificador: inicial del nombre + 6 letras del apellido + número incremental). |
+| RF-23 | El sistema debe almacenar el dictamen completo y firmado en la base de datos propia del sistema. |
+| RF-24 | El sistema debe enviar al SUA, mediante la API que este expone, el subconjunto de campos correspondiente a los "datos complementarios" de la solicitud. |
+| RF-25 | Si el envío al SUA falla, el sistema debe guardar el dictamen localmente con estado "pendiente de sincronizar" y reintentar el envío automáticamente. |
+| RF-26 | El sistema debe permitir descargar el dictamen firmado en formato PDF (u otro formato imprimible) para su impresión como documento legal. |
+| RF-27 | El sistema debe conservar un historial de todos los dictámenes emitidos para un mismo caso (Número de SUA-Año), sin sobrescribir los anteriores. |
+| RF-28 | El sistema debe permitir a un ingeniero que dictamina un caso en estado Pendiente-revisión consultar el dictamen anterior (contenido y autor), sin precargarlo en el formulario nuevo. |
+| RF-29 | El sistema debe limitar los datos del vecino visibles a lo estrictamente necesario para el trabajo técnico (ubicación y descripción del reclamo), excluyendo nombre y datos de contacto. |
 
-### Realizar dictamen técnico
+### Módulo 5 — Trabajo sin conexión y sincronización
 
-| ID | Descripción | Prioridad |
-| --- | --- | --- |
-| RF-12 | Exigir como primer paso N.° de SUA + año, validar existencia y estado "sin dictaminar"; si no corresponde, impedir continuar mostrando el motivo. | Alta |
-| RF-13 | Cargar datos del ejemplar: dirección exacta, especie, diámetro/perímetro, problemática y observaciones. | Alta |
-| RF-14 | Seleccionar tipo de intervención (poda, extracción, corte de raíces u otras) bloqueando combinaciones mutuamente excluyentes (extracción deshabilita poda y corte de raíces, y viceversa). | Alta |
-| RF-15 | Clasificar por urgencia (urgente/corto/mediano/largo plazo) y complejidad (baja/media/alta/máxima), un único valor por campo. El campo booleano "urgente" es independiente del plazo y puede coexistir con cualquiera de ellos. | Alta |
-| RF-16 | Sugerir y registrar la época recomendada de intervención según estación del año y especie. | Media |
-| RF-17 | Adjuntar fotografías y geolocalización (opcional). | Media |
-| RF-18 | Exigir firma digital (captura táctil) + matrícula registrada para confirmar el dictamen; bloquear la firma a usuarios sin matrícula. | Alta |
-| RF-19 | Registrar fecha de emisión, calcular vencimiento a 18 meses y dejar el dictamen firmado en solo lectura (inmutable), con sello de tiempo, matrícula y hash. | Alta |
-| RF-20 | Actualizar el estado del reclamo de "sin dictaminar" a "dictaminado" al guardar el dictamen firmado. | Alta |
+| ID | Requisito |
+|----|-----------|
+| RF-30 | El sistema debe estar disponible como PWA instalable en los captores (dispositivos Android provistos por la organización). |
+| RF-31 | El sistema debe permitir completar y firmar un dictamen sin conexión a internet, siempre que la ruta correspondiente ya haya sido generada con conexión. |
+| RF-32 | El sistema debe guardar localmente en el dispositivo cualquier dictamen firmado sin conexión, en estado "pendiente de sincronizar". |
+| RF-33 | El sistema debe reintentar automáticamente el envío de los dictámenes pendientes de sincronizar en cuanto detecte conexión, sin intervención manual del usuario. |
+| RF-34 | El sistema debe mostrar al ingeniero un indicador permanente del estado de sincronización (todo sincronizado / cantidad de dictámenes pendientes / sin conexión). |
 
-### Rutas eficientes
+### Módulo 6 — Dashboard
 
-| ID | Descripción | Prioridad |
-| --- | --- | --- |
-| RF-21 | Seleccionar zona/área y planificar por horas de trabajo o cantidad de casos, con 10 min/dictamen configurable. | Alta |
-| RF-22 | Elegir modo de traslado (auto, a pie, bicicleta) y generar la ruta más eficiente por tiempo total, partiendo y volviendo a Parques y Paseos. | Alta |
-| RF-23 | Balanceador de carga por sesión: ajustar distribución por prioridad con controles deslizables (modos: urgentes primero, por porcentaje, automático equilibrado). | Alta |
-| RF-24 | Configurar y guardar perfiles/presets de distribución (p. ej. 100% urgentes) para directivas superiores. | Alta |
-| RF-25 | Redistribuir automáticamente el cupo cuando una prioridad no tenga stock suficiente, considerando además la época recomendada (RF-16). | Media |
-| RF-26 | Mostrar la ruta en mapa (Google Maps / Leaflet) con pin por prioridad, cronograma estimado, desglose de tiempos (traslado vs. dictaminación) y % de eficiencia. | Alta |
-| RF-27 | Consultar N.° SUA y año de cada reclamo asignado desde la página de rutas. | Media |
+| ID | Requisito |
+|----|-----------|
+| RF-35 | El sistema debe mostrar, para los roles Jefe, Administrador y Lector, la cantidad de solicitudes derivadas a la Dirección Técnica, dictaminadas y sin dictaminar. |
+| RF-36 | El sistema debe permitir filtrar las métricas del dashboard por mes y por año. |
+| RF-37 | El sistema debe contabilizar cada re-derivación de una solicitud (por vencimiento) como un evento independiente en las métricas, aunque corresponda al mismo Número de SUA-Año. |
 
-### Urgencia por Tormenta
+## Requisitos no funcionales
 
-| ID | Descripción | Prioridad |
-| --- | --- | --- |
-| RF-28 | Mostrar la sección solo si hay reclamos con etiqueta de tormenta; listar casos de los últimos 3 días con filtro por fecha; badge con la cantidad de pendientes. | Alta |
-| RF-29 | Tratar todos los casos de tormenta con la misma prioridad, sin distribución por niveles ni balanceador. | Alta |
-| RF-30 | Calcular la ruta de emergencia priorizando la mínima distancia/tiempo total. | Alta |
+### Rendimiento y disponibilidad
 
-### Rol Administrador
+| ID | Requisito |
+|----|-----------|
+| RNF-01 | El sistema debe estar disponible 24/7, salvo ventanas de mantenimiento programadas fuera de la jornada operativa (lunes a sábado, 7 a 17 hs). |
+| RNF-02 | El sistema debe soportar el uso simultáneo de entre 4 y 7 ingenieros sin degradación perceptible del tiempo de respuesta. |
+| RNF-03 | El sistema debe soportar un volumen de al menos 140 dictámenes diarios (aprox. 20 por ingeniero) sin degradación del rendimiento. |
+| RNF-04 | En modo offline, cada solicitud HTTP debe tener un tiempo límite de espera corto (del orden de segundos) para no bloquear la interfaz ante señal intermitente. |
 
-| ID | Descripción | Prioridad |
-| --- | --- | --- |
-| RF-31 | Vincular una cuenta institucional existente a un rol (Lector/Operario/Administrador) y cargar matrícula para Operarios. El sistema no gestiona altas de credenciales ni contraseñas (dependen del mecanismo institucional). Desactivar un usuario revoca su acceso sin afectar la cuenta institucional.<br>*Nota de alcance — prototipo académico:* dado que el equipo no cuenta con permisos para los endpoints reales, la demo usa Supabase, donde el Administrador sí puede dar de alta cuentas de prueba con contraseña propia, solo a fines demostrativos. En producción el flujo pasa a ser exclusivamente de vinculación de rol. | Alta |
-| RF-32 | Configurar los adaptadores de conexión externa (SUA, autenticación institucional) sin modificar código fuente, dejando preparado —no operativo— el módulo de certificación de firma digital (placeholder académico). | Alta |
+### Seguridad y usabilidad
 
-## Requerimientos no funcionales
+| ID | Requisito |
+|----|-----------|
+| RNF-05 | La contraseña local debe exigir un mínimo de 8 caracteres, con al menos una mayúscula, una minúscula, un número y un carácter especial. |
+| RNF-06 | El sistema no debe almacenar ni transmitir la contraseña institucional del usuario; la validación institucional se realiza solo con usuario + API key propia. |
+| RNF-07 | El sistema debe usar HTTPS/TLS en todas las comunicaciones con el SUA, la Autenticación Institucional y entre cliente y servidor. |
+| RNF-08 | El sistema debe limitar los datos personales del vecino que consulta y almacena a los estrictamente necesarios para el trabajo técnico. |
+| RNF-09 | La interfaz debe ser utilizable en pantallas de celular (diseño responsive), dado que el ingeniero trabaja desde un captor en el campo. |
 
-| ID | Categoría | Descripción | Prioridad |
-| --- | --- | --- | --- |
-| RNF-01 | Usabilidad / Responsive | Totalmente funcional en celular y tablet (uso principal en campo), adaptable a escritorio. | Alta |
-| RNF-02 | Accesibilidad de despliegue | Accesible desde una URL pública fija sin instalación ni configuración previa. | Alta |
-| RNF-03 | Conectividad en campo | Debe operar mediante datos móviles, sin depender del proxy de la red municipal interna. | Alta |
-| RNF-04 | Rendimiento | Responder a login, listado, guardado de dictamen y cálculo de ruta en tiempo aceptable bajo conectividad variable. | Media |
-| RNF-05 | Seguridad de acceso | Protección por autenticación y control de sesión por token; sin recursos internos accesibles sin autenticación. | Alta |
-| RNF-06 | Integridad y trazabilidad | Dictámenes firmados como registros inmutables con sello de tiempo, matrícula y hash. | Alta |
-| RNF-07 | Consistencia de datos | Integridad referencial entre reclamos, dictámenes, ingenieros y rutas; sin dictámenes huérfanos o duplicados. | Alta |
-| RNF-08 | Mantenibilidad / Desacoplamiento | Lógica de negocio aislada de proveedores externos (SUA, autenticación municipal); pase a producción solo reconfigura conectores. | Alta |
-| RNF-09 | Configurabilidad | Parámetros de negocio (tiempo por dictamen, umbrales, perfiles, criterios estacionales) configurables sin tocar código. | Alta |
-| RNF-10 | Escalabilidad | La arquitectura permite incorporar nuevos módulos o reglas sin rediseñar el sistema. | Media |
-| RNF-11 | Despliegue continuo | Despliegue automático desde el repositorio ante cada actualización de la rama principal. | Media |
-| RNF-12 | Compatibilidad con el SUA | Preparado para consumir reclamos del SUA en producción reemplazando los endpoints de lectura, sin alterar el resto de la app. | Alta |
-| RNF-13 | Despapelización | Elimina la necesidad de soporte físico para la emisión y carga del dictamen técnico. | Media |
+### Almacenamiento y continuidad
+
+| ID | Requisito |
+|----|-----------|
+| RNF-10 | Los dictámenes deben conservarse de forma indefinida en la base de datos del sistema, dado su valor de documento legal. |
+| RNF-11 | El sistema debe contar con copias de backup periódicas de la base de datos de dictámenes. |
+
+### Plataforma
+
+| ID | Requisito |
+|----|-----------|
+| RNF-12 | El sistema debe funcionar como PWA instalable en dispositivos Android (captores provistos por la organización). |
+| RNF-13 | El sistema no requiere soporte para iOS, dado que los dispositivos de campo son exclusivamente Android. |
+| RNF-14 | El sistema debe utilizar un servicio de mapas/geolocalización de uso gratuito para la generación de rutas. |
