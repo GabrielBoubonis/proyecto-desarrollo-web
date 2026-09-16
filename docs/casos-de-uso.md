@@ -2,73 +2,466 @@
 
 ## Diagrama general
 
-_Incluir el código PlantUML en `diagramas/casos-de-uso.puml`._
+_El código PlantUML se encuentra en `diagramas/casos-de-uso.puml`._
 _Visualizar en [plantuml.com](https://www.plantuml.com/plantuml/uml/)._
 
-_Describir brevemente los actores identificados y las relaciones principales (include, extend)._
+### Actores identificados
+
+**Actores principales** (inician los casos de uso, son los roles del sistema):
+
+- **Operador** — ingeniero de campo. Consulta solicitudes, arma rutas, dictamina.
+- **Jefe** — mismo acceso operativo que el Operador, más el dashboard.
+- **Administrador** — personal del CIL. Gestiona usuarios y roles; en el resto del sistema
+  se comporta como lector.
+- **Lector** — consulta pasiva del dashboard y del protocolo por tormenta.
+
+**Actores secundarios** (sistemas externos que participan, pero no inician):
+
+- **SUA (Sistema Único de Atención)** — provee las solicitudes derivadas y recibe los datos
+  complementarios del dictamen.
+- **Autenticación Institucional** — valida la vigencia del usuario en la institución.
+
+### Relaciones principales
+
+| Relación | Casos involucrados | Motivo |
+|---|---|---|
+| `<<include>>` | CU-06 incluye CU-07 | Todo dictamen emitido debe sincronizarse con el SUA; no es opcional. |
+| `<<include>>` | CU-04 incluye CU-03 | Para generar una ruta, el sistema siempre necesita consultar las solicitudes disponibles. |
+| `<<include>>` | CU-12 incluye CU-04 | El protocolo por tormenta reutiliza el mecanismo de generación de ruta, con criterios propios. |
+| `<<extend>>` | CU-09 extiende CU-06 | Solo se consulta el dictamen anterior si la solicitud está en estado Pendiente-revisión. |
+| `<<extend>>` | CU-10 extiende CU-06 | Solo aplica si el dispositivo no tiene conexión al momento de firmar. |
 
 ---
 
-## CU-01 — [Nombre]
+## CU-01 — Iniciar sesión
 
 | Campo | Detalle |
 |-------|---------|
 | Identificador | CU-01 |
-| Nombre | |
-| Descripción | |
-| Actores | Principal: / Secundario: |
-| Precondiciones | |
-| Postcondiciones | Éxito: / Fallo: |
+| Nombre | Iniciar sesión |
+| Descripción | Un usuario del sistema se identifica con sus credenciales para acceder a las funciones habilitadas según su rol. |
+| Actores | Principal: Operador, Jefe, Administrador, Lector / Secundario: Autenticación Institucional |
+| Precondiciones | El usuario tiene una cuenta creada en el sistema por el Administrador. |
+| Postcondiciones | Éxito: el usuario queda autenticado y accede a las funciones de su rol. / Fallo: el acceso es denegado y el usuario permanece fuera del sistema. |
 
 ### Secuencia normal
 
 | # | Acción (actor) | Reacción (sistema) |
 |---|----------------|--------------------|
-| 1 | | |
-| 2 | | |
+| 1 | El usuario accede a la pantalla de ingreso. | El sistema muestra el formulario de usuario y contraseña. |
+| 2 | El usuario ingresa sus credenciales y confirma. | El sistema verifica que las credenciales correspondan a un usuario registrado.<br>• 2.1 Si las credenciales no son válidas, el sistema deberá denegar el acceso y mostrar un mensaje de error genérico. |
+| 3 | — | El sistema consulta a la Autenticación Institucional que el usuario siga vigente en la institución.<br>• 3.1 Si el usuario no está vigente, el sistema deberá denegar el acceso. |
+| 4 | — | El sistema habilita el acceso y muestra el menú correspondiente al rol del usuario. |
 
 ### Excepciones
 
 | # | Situación | Respuesta del sistema |
 |---|-----------|-----------------------|
-| E1 | | |
+| E1 | La Autenticación Institucional no responde. | El sistema informa que el servicio de autenticación no está disponible y sugiere reintentar más tarde. |
+| E2 | El usuario permanece 30 minutos sin interactuar con el sistema. | El sistema cierra la sesión automáticamente y solicita un nuevo ingreso. |
 
 | Campo | Detalle |
 |-------|---------|
-| Rendimiento | |
-| Frecuencia | |
-| Importancia | |
-| Urgencia | |
+| Rendimiento | El sistema deberá completar los pasos 2 al 4 en un tiempo breve, sin que el usuario perciba demora. |
+| Frecuencia | Una media de 5 a 10 veces al día (al menos una por usuario por jornada). |
+| Importancia | Vital |
+| Urgencia | Inmediatamente |
 
 ---
 
-## CU-02 — [Nombre]
+## CU-02 — Gestionar usuarios y roles
 
 | Campo | Detalle |
 |-------|---------|
 | Identificador | CU-02 |
-| Nombre | |
-| Descripción | |
-| Actores | Principal: / Secundario: |
-| Precondiciones | |
-| Postcondiciones | Éxito: / Fallo: |
+| Nombre | Gestionar usuarios y roles |
+| Descripción | El Administrador del CIL da de alta, modifica o da de baja usuarios del sistema y les asigna un rol, para controlar el acceso al sistema. |
+| Actores | Principal: Administrador / Secundario: — |
+| Precondiciones | El Administrador inició sesión (CU-01). |
+| Postcondiciones | Éxito: el usuario queda creado, modificado o dado de baja, con su rol asignado. / Fallo: no se altera el padrón de usuarios existente. |
 
 ### Secuencia normal
 
 | # | Acción (actor) | Reacción (sistema) |
 |---|----------------|--------------------|
-| 1 | | |
-| 2 | | |
+| 1 | El Administrador accede al apartado de gestión de usuarios. | El sistema muestra el listado de usuarios existentes con su rol. |
+| 2 | El Administrador elige crear un usuario nuevo. | El sistema muestra el formulario de alta. |
+| 3 | El Administrador completa los datos, define una contraseña y selecciona un rol. | El sistema verifica que la contraseña cumpla las reglas de complejidad.<br>• 3.1 Si la contraseña no cumple los requisitos, el sistema deberá rechazar el alta e indicar qué requisito falta. |
+| 4 | El Administrador confirma el alta. | El sistema registra el usuario con el rol asignado y lo muestra en el listado. |
 
 ### Excepciones
 
 | # | Situación | Respuesta del sistema |
 |---|-----------|-----------------------|
-| E1 | | |
+| E1 | El nombre de usuario generado ya existe. | El sistema agrega un número incremental al identificador para diferenciarlo. |
+| E2 | Un usuario perdió su contraseña y el Administrador la restablece. | El sistema genera una nueva contraseña y deja sin efecto la anterior. |
+| E3 | Se da de baja un usuario con sesión activa. | El sistema le impide continuar operando y le niega el siguiente ingreso. |
 
 | Campo | Detalle |
 |-------|---------|
-| Rendimiento | |
-| Frecuencia | |
-| Importancia | |
-| Urgencia | |
+| Rendimiento | El sistema deberá completar los pasos 3 y 4 sin demora perceptible. |
+| Frecuencia | Baja: unas pocas veces al mes, ante altas, bajas o cambios de rol del personal. |
+| Importancia | Vital |
+| Urgencia | Hay presión |
+
+---
+
+## CU-03 — Consultar solicitudes derivadas
+
+| Campo | Detalle |
+|-------|---------|
+| Identificador | CU-03 |
+| Nombre | Consultar solicitudes derivadas |
+| Descripción | Un ingeniero consulta el listado de solicitudes de arbolado derivadas a la Dirección Técnica, para conocer qué casos están disponibles para dictaminar. |
+| Actores | Principal: Operador, Jefe / Secundario: SUA |
+| Precondiciones | El usuario inició sesión (CU-01) y el sistema tiene conexión con el SUA. |
+| Postcondiciones | Éxito: el usuario visualiza las solicitudes derivadas con su identificador y estado. / Fallo: el listado no se muestra y el usuario es informado del motivo. |
+
+### Secuencia normal
+
+| # | Acción (actor) | Reacción (sistema) |
+|---|----------------|--------------------|
+| 1 | El usuario accede al apartado de solicitudes. | El sistema consulta al SUA las solicitudes de arbolado derivadas a la Dirección Técnica. |
+| 2 | — | El sistema muestra el listado con el identificador de cada solicitud (Número de SUA - Año) y su estado.<br>• 2.1 Si una solicitud fue re-derivada por vencimiento, el sistema deberá mostrarla en estado Pendiente-revisión.<br>• 2.2 Si una solicitud está etiquetada como emergencia por tormenta, el sistema deberá excluirla de este listado y mostrarla únicamente en el protocolo por tormenta (CU-12). |
+| 3 | El usuario selecciona una solicitud. | El sistema muestra el detalle técnico del caso, sin datos personales del vecino. |
+
+### Excepciones
+
+| # | Situación | Respuesta del sistema |
+|---|-----------|-----------------------|
+| E1 | El SUA no responde o no está disponible. | El sistema informa que no puede obtener las solicitudes en este momento y sugiere reintentar. |
+| E2 | No hay solicitudes derivadas pendientes. | El sistema muestra el listado vacío con un mensaje aclaratorio. |
+
+| Campo | Detalle |
+|-------|---------|
+| Rendimiento | El sistema deberá mostrar el listado del paso 2 en un tiempo acotado, aun con la totalidad de solicitudes pendientes. |
+| Frecuencia | Varias veces al día por cada ingeniero, al inicio de la jornada y entre visitas. |
+| Importancia | Vital |
+| Urgencia | Inmediatamente |
+
+---
+
+## CU-04 — Generar ruta de trabajo
+
+| Campo | Detalle |
+|-------|---------|
+| Identificador | CU-04 |
+| Nombre | Generar ruta de trabajo |
+| Descripción | Un ingeniero genera su ruta de trabajo diaria seleccionando los criterios con los que quiere organizar su jornada. |
+| Actores | Principal: Operador, Jefe / Secundario: — |
+| Precondiciones | El usuario inició sesión (CU-01), tiene conexión a internet y existen solicitudes pendientes disponibles. |
+| Postcondiciones | Éxito: queda armada una ruta con solicitudes reservadas para ese ingeniero, no disponibles para otras rutas. / Fallo: no se genera ninguna ruta y las solicitudes siguen disponibles para todos. |
+
+### Secuencia normal
+
+| # | Acción (actor) | Reacción (sistema) |
+|---|----------------|--------------------|
+| 1 | El usuario accede al apartado de rutas. | El sistema muestra las opciones de criterios disponibles. |
+| 2 | El usuario define los criterios: cantidad o porcentaje por distrito, cantidad por nivel de prioridad y/o una zona señalada en el mapa. | El sistema toma los criterios indicados.<br>• 2.1 Si el usuario no indica distrito, el sistema deberá armar la ruta con el resto de los criterios seleccionados. |
+| 3 | El usuario confirma la generación de la ruta. | El sistema selecciona las solicitudes pendientes que cumplen los criterios, excluyendo las que ya forman parte de la ruta activa de otro ingeniero. |
+| 4 | — | El sistema arma la ruta ordenada, la muestra al usuario y reserva esas solicitudes. |
+
+### Excepciones
+
+| # | Situación | Respuesta del sistema |
+|---|-----------|-----------------------|
+| E1 | El dispositivo no tiene conexión a internet. | El sistema no permite generar la ruta e informa que esta acción requiere conexión. |
+| E2 | No hay solicitudes disponibles que cumplan los criterios indicados. | El sistema informa que no se encontraron casos y permite modificar los criterios. |
+| E3 | Todas las solicitudes que cumplen los criterios ya están reservadas en rutas de otros ingenieros. | El sistema informa la situación y sugiere ampliar los criterios. |
+
+| Campo | Detalle |
+|-------|---------|
+| Rendimiento | El sistema deberá completar los pasos 3 y 4 en un tiempo razonable, considerando que involucra el cálculo de un recorrido. |
+| Frecuencia | Una media de una vez al día por ingeniero, con eventuales regeneraciones. |
+| Importancia | Vital |
+| Urgencia | Inmediatamente |
+
+---
+
+## CU-05 — Restablecer ruta de trabajo
+
+| Campo | Detalle |
+|-------|---------|
+| Identificador | CU-05 |
+| Nombre | Restablecer ruta de trabajo |
+| Descripción | Un ingeniero descarta su ruta activa para poder armar una nueva, liberando las solicitudes que no alcanzó a dictaminar. |
+| Actores | Principal: Operador, Jefe / Secundario: — |
+| Precondiciones | El usuario tiene una ruta activa generada (CU-04). |
+| Postcondiciones | Éxito: la ruta queda descartada y las solicitudes no dictaminadas vuelven a estar disponibles para cualquier ingeniero. / Fallo: la ruta se mantiene activa sin cambios. |
+
+### Secuencia normal
+
+| # | Acción (actor) | Reacción (sistema) |
+|---|----------------|--------------------|
+| 1 | El usuario accede a su ruta activa. | El sistema muestra las solicitudes de la ruta, indicando cuáles ya fueron dictaminadas. |
+| 2 | El usuario selecciona la opción de restablecer. | El sistema solicita confirmación, advirtiendo que se descartará la ruta completa. |
+| 3 | El usuario confirma. | El sistema descarta la ruta y libera las solicitudes no dictaminadas, dejándolas disponibles para otras rutas. |
+| 4 | — | El sistema ofrece al usuario generar una nueva ruta (CU-04). |
+
+### Excepciones
+
+| # | Situación | Respuesta del sistema |
+|---|-----------|-----------------------|
+| E1 | Llegan las 18:00 hs y el usuario no restableció ni completó su ruta. | El sistema libera automáticamente todas las solicitudes no dictaminadas de la ruta. |
+| E2 | El usuario intenta restablecer una ruta en la que ya dictaminó todos los casos. | El sistema informa que no hay solicitudes para liberar y permite generar una ruta nueva. |
+
+| Campo | Detalle |
+|-------|---------|
+| Rendimiento | El sistema deberá liberar las solicitudes del paso 3 de forma inmediata, de modo que queden disponibles para otros ingenieros sin demora. |
+| Frecuencia | Ocasional: algunas veces por semana, ante cambios de prioridad durante la jornada. |
+| Importancia | Importante |
+| Urgencia | Hay presión |
+
+---
+
+## CU-06 — Emitir dictamen técnico
+
+| Campo | Detalle |
+|-------|---------|
+| Identificador | CU-06 |
+| Nombre | Emitir dictamen técnico |
+| Descripción | Un ingeniero completa y firma el dictamen técnico de una solicitud, dejando registrada la intervención que corresponde sobre el ejemplar. |
+| Actores | Principal: Operador, Jefe / Secundario: SUA |
+| Precondiciones | El usuario inició sesión (CU-01) y la solicitud está en estado Pendiente o Pendiente-revisión. |
+| Postcondiciones | Éxito: el dictamen queda firmado y almacenado, la solicitud pasa a estado Dictaminada y sus datos se envían al SUA (CU-07). / Fallo: no se registra ningún dictamen y la solicitud permanece pendiente. |
+
+### Secuencia normal
+
+| # | Acción (actor) | Reacción (sistema) |
+|---|----------------|--------------------|
+| 1 | El usuario selecciona una solicitud de su ruta. | El sistema muestra el formulario de dictamen en blanco, junto al detalle técnico del caso.<br>• 1.1 Si la solicitud está en estado Pendiente-revisión, el sistema deberá ofrecer consultar el dictamen anterior (CU-09). |
+| 2 | El usuario registra las características del ejemplar y la intervención que corresponde. | El sistema valida que los datos obligatorios estén completos.<br>• 2.1 Si faltan datos obligatorios, el sistema deberá señalar los campos incompletos y no permitir el envío. |
+| 3 | El usuario confirma el envío del dictamen. | El sistema verifica que la solicitud no haya sido dictaminada por otro ingeniero mientras tanto.<br>• 3.1 Si ya existe un dictamen activo para ese ejemplar, el sistema deberá rechazar el envío e informar que el caso ya fue resuelto. |
+| 4 | — | El sistema firma el dictamen dejando registro de quién lo emitió y cuándo, y lo almacena. |
+| 5 | — | El sistema envía los datos del dictamen al SUA (CU-07) y actualiza el estado de la solicitud a Dictaminada. |
+
+### Excepciones
+
+| # | Situación | Respuesta del sistema |
+|---|-----------|-----------------------|
+| E1 | El dispositivo no tiene conexión al momento de firmar. | El sistema firma y guarda el dictamen en el dispositivo, en estado pendiente de sincronizar (CU-10). |
+| E2 | El SUA no acepta la actualización. | El sistema conserva el dictamen firmado en estado pendiente de sincronizar y reintenta el envío automáticamente (CU-07). |
+| E3 | La sesión del usuario venció durante la carga del dictamen. | El sistema solicita un nuevo ingreso sin descartar los datos cargados ni la ruta armada. |
+
+| Campo | Detalle |
+|-------|---------|
+| Rendimiento | El sistema deberá completar los pasos 3 al 5 sin que el ingeniero deba esperar frente al ejemplar. |
+| Frecuencia | Una media de 20 veces al día por ingeniero (aproximadamente 140 diarias en total). |
+| Importancia | Vital |
+| Urgencia | Inmediatamente |
+
+---
+
+## CU-07 — Sincronizar dictamen con el SUA
+
+| Campo | Detalle |
+|-------|---------|
+| Identificador | CU-07 |
+| Nombre | Sincronizar dictamen con el SUA |
+| Descripción | El sistema envía al SUA los datos complementarios de un dictamen ya firmado, para que la solicitud quede actualizada en el circuito general. |
+| Actores | Principal: Operador, Jefe (de forma indirecta, al emitir el dictamen) / Secundario: SUA |
+| Precondiciones | Existe al menos un dictamen firmado, con o sin envío previo fallido. |
+| Postcondiciones | Éxito: el SUA registra los datos complementarios y el dictamen queda marcado como sincronizado. / Fallo: el dictamen permanece firmado localmente en estado pendiente de sincronizar. |
+
+### Secuencia normal
+
+| # | Acción (actor) | Reacción (sistema) |
+|---|----------------|--------------------|
+| 1 | — | El sistema detecta un dictamen firmado pendiente de enviar y verifica que haya conexión disponible. |
+| 2 | — | El sistema envía al SUA los datos complementarios correspondientes a esa solicitud. |
+| 3 | — | El sistema recibe la confirmación del SUA y marca el dictamen como sincronizado.<br>• 3.1 Si el envío no se confirma, el sistema deberá mantener el dictamen en estado pendiente de sincronizar y programar un nuevo intento. |
+| 4 | — | El sistema actualiza el indicador de sincronización visible para el usuario. |
+
+### Excepciones
+
+| # | Situación | Respuesta del sistema |
+|---|-----------|-----------------------|
+| E1 | El SUA está caído o no responde. | El sistema conserva el dictamen firmado y reintenta automáticamente más adelante, sin intervención del usuario. |
+| E2 | El dispositivo no recupera conexión durante toda la jornada. | El sistema mantiene los dictámenes en cola y los envía apenas haya conexión, incluso en jornadas posteriores. |
+
+| Campo | Detalle |
+|-------|---------|
+| Rendimiento | El sistema deberá realizar el envío del paso 2 en segundo plano, sin bloquear el trabajo del ingeniero. |
+| Frecuencia | Una vez por cada dictamen emitido (aproximadamente 140 diarias). |
+| Importancia | Vital |
+| Urgencia | Inmediatamente |
+
+---
+
+## CU-08 — Descargar dictamen en formato imprimible
+
+| Campo | Detalle |
+|-------|---------|
+| Identificador | CU-08 |
+| Nombre | Descargar dictamen en formato imprimible |
+| Descripción | Un ingeniero descarga un dictamen firmado en formato PDF, para poder imprimirlo como documento legal cuando sea requerido. |
+| Actores | Principal: Operador, Jefe / Secundario: — |
+| Precondiciones | Existe un dictamen firmado para la solicitud consultada. |
+| Postcondiciones | Éxito: el usuario obtiene un archivo con el contenido completo del dictamen y sus datos de firma. / Fallo: no se genera el archivo y el dictamen permanece disponible en el sistema. |
+
+### Secuencia normal
+
+| # | Acción (actor) | Reacción (sistema) |
+|---|----------------|--------------------|
+| 1 | El usuario accede al detalle de una solicitud dictaminada. | El sistema muestra el dictamen firmado y la opción de descarga. |
+| 2 | El usuario selecciona la opción de descargar. | El sistema genera el documento con el contenido del dictamen y los datos de la firma (autor y fecha de emisión). |
+| 3 | — | El sistema entrega el archivo al usuario para su descarga. |
+
+### Excepciones
+
+| # | Situación | Respuesta del sistema |
+|---|-----------|-----------------------|
+| E1 | El dictamen solicitado corresponde a un caso con varios dictámenes en su historial. | El sistema permite descargar cualquiera de ellos, identificando a cuál corresponde. |
+| E2 | El documento no puede generarse. | El sistema informa el inconveniente y mantiene el dictamen accesible para reintentar. |
+
+| Campo | Detalle |
+|-------|---------|
+| Rendimiento | El sistema deberá generar el documento del paso 2 sin demora perceptible para el usuario. |
+| Frecuencia | Ocasional: solo cuando se requiere el documento legal impreso. |
+| Importancia | Importante |
+| Urgencia | Puede esperar |
+
+---
+
+## CU-09 — Consultar dictamen anterior
+
+| Campo | Detalle |
+|-------|---------|
+| Identificador | CU-09 |
+| Nombre | Consultar dictamen anterior |
+| Descripción | Un ingeniero consulta el dictamen previo de un caso re-derivado por vencimiento, para conocer qué se evaluó la vez anterior antes de emitir el nuevo. |
+| Actores | Principal: Operador, Jefe / Secundario: — |
+| Precondiciones | La solicitud está en estado Pendiente-revisión y tiene al menos un dictamen en su historial. |
+| Postcondiciones | Éxito: el usuario visualiza el contenido del dictamen anterior y quién lo emitió. / Fallo: el formulario del nuevo dictamen permanece disponible sin la información de referencia. |
+
+### Secuencia normal
+
+| # | Acción (actor) | Reacción (sistema) |
+|---|----------------|--------------------|
+| 1 | El usuario abre una solicitud en estado Pendiente-revisión. | El sistema muestra el formulario del nuevo dictamen en blanco, junto a la opción de consultar el dictamen anterior. |
+| 2 | El usuario selecciona consultar el dictamen anterior. | El sistema muestra el contenido completo del dictamen previo y el usuario que lo emitió, sin precargarlo en el formulario. |
+| 3 | El usuario cierra la consulta. | El sistema regresa al formulario del nuevo dictamen, conservando lo que el usuario ya haya cargado. |
+
+### Excepciones
+
+| # | Situación | Respuesta del sistema |
+|---|-----------|-----------------------|
+| E1 | El caso tiene más de un dictamen en su historial. | El sistema muestra el historial completo, identificando la fecha y el autor de cada uno. |
+| E2 | El dispositivo no tiene conexión y el dictamen anterior no está disponible localmente. | El sistema informa que la consulta requiere conexión, sin impedir la carga del nuevo dictamen. |
+
+| Campo | Detalle |
+|-------|---------|
+| Rendimiento | El sistema deberá mostrar el dictamen anterior del paso 2 sin demora perceptible. |
+| Frecuencia | Poco frecuente: solo ante casos re-derivados por vencimiento, situación excepcional. |
+| Importancia | Importante |
+| Urgencia | Puede esperar |
+
+---
+
+## CU-10 — Dictaminar sin conexión
+
+| Campo | Detalle |
+|-------|---------|
+| Identificador | CU-10 |
+| Nombre | Dictaminar sin conexión |
+| Descripción | Un ingeniero completa y firma un dictamen en un lugar sin señal, y el sistema lo conserva para enviarlo automáticamente al recuperar conexión. |
+| Actores | Principal: Operador, Jefe / Secundario: SUA |
+| Precondiciones | El usuario generó previamente su ruta con conexión y tiene la aplicación instalada en el dispositivo. |
+| Postcondiciones | Éxito: el dictamen queda firmado y guardado en el dispositivo, en estado pendiente de sincronizar. / Fallo: el dictamen no se registra y la solicitud permanece pendiente en la ruta del ingeniero. |
+
+### Secuencia normal
+
+| # | Acción (actor) | Reacción (sistema) |
+|---|----------------|--------------------|
+| 1 | El usuario abre una solicitud de su ruta estando sin señal. | El sistema muestra el detalle del caso y el formulario de dictamen, ya disponibles en el dispositivo. |
+| 2 | El usuario completa el dictamen y confirma el envío. | El sistema firma el dictamen y lo guarda en el dispositivo en estado pendiente de sincronizar. |
+| 3 | — | El sistema actualiza el indicador de sincronización, mostrando la cantidad de dictámenes en espera. |
+| 4 | El usuario recupera señal. | El sistema envía automáticamente los dictámenes pendientes al SUA (CU-07), sin intervención del usuario. |
+
+### Excepciones
+
+| # | Situación | Respuesta del sistema |
+|---|-----------|-----------------------|
+| E1 | El usuario intenta generar una ruta nueva estando sin conexión. | El sistema no permite la operación e informa que esa acción requiere conexión. |
+| E2 | La señal es intermitente durante el envío. | El sistema no bloquea la interfaz: mantiene el dictamen en cola y reintenta cuando la conexión se estabiliza. |
+| E3 | El usuario termina la jornada con dictámenes sin sincronizar. | El sistema los conserva en el dispositivo y los envía en cuanto haya conexión, aun en jornadas posteriores. |
+
+| Campo | Detalle |
+|-------|---------|
+| Rendimiento | El sistema deberá completar el paso 2 sin depender de la red, de modo que el ingeniero no perciba diferencia respecto del trabajo con conexión. |
+| Frecuencia | Variable según la zona: se espera que ocurra en una porción menor de los dictámenes diarios. |
+| Importancia | Vital |
+| Urgencia | Inmediatamente |
+
+---
+
+## CU-11 — Consultar dashboard de métricas
+
+| Campo | Detalle |
+|-------|---------|
+| Identificador | CU-11 |
+| Nombre | Consultar dashboard de métricas |
+| Descripción | Un responsable consulta las métricas de solicitudes derivadas, dictaminadas y sin dictaminar, para hacer seguimiento del trabajo del área por período. |
+| Actores | Principal: Jefe, Administrador, Lector / Secundario: — |
+| Precondiciones | El usuario inició sesión (CU-01) con un rol habilitado para ver el dashboard. |
+| Postcondiciones | Éxito: el usuario visualiza las métricas del período seleccionado. / Fallo: las métricas no se muestran y el usuario es informado del motivo. |
+
+### Secuencia normal
+
+| # | Acción (actor) | Reacción (sistema) |
+|---|----------------|--------------------|
+| 1 | El usuario accede al dashboard. | El sistema muestra la cantidad de solicitudes derivadas, dictaminadas y sin dictaminar. |
+| 2 | El usuario selecciona un período (mes o año). | El sistema recalcula y muestra las métricas correspondientes a ese período.<br>• 2.1 Si una solicitud fue re-derivada por vencimiento, el sistema deberá contarla como un evento independiente en el período en que ocurrió. |
+| 3 | El usuario consulta el desglose de solicitudes de tormenta. | El sistema muestra las métricas exclusivas de emergencias climáticas, además de estar incluidas en el total general. |
+
+### Excepciones
+
+| # | Situación | Respuesta del sistema |
+|---|-----------|-----------------------|
+| E1 | No hay datos registrados para el período seleccionado. | El sistema muestra las métricas en cero, aclarando que no hubo actividad en ese período. |
+| E2 | Un usuario sin rol habilitado intenta acceder al dashboard. | El sistema le niega el acceso a la sección. |
+
+| Campo | Detalle |
+|-------|---------|
+| Rendimiento | El sistema deberá mostrar las métricas de los pasos 1 y 2 en un tiempo acotado, aun considerando el historial acumulado. |
+| Frecuencia | Una media de varias veces por semana, según la necesidad de seguimiento de la Dirección. |
+| Importancia | Importante |
+| Urgencia | Puede esperar |
+
+---
+
+## CU-12 — Atender protocolo por tormenta
+
+| Campo | Detalle |
+|-------|---------|
+| Identificador | CU-12 |
+| Nombre | Atender protocolo por tormenta |
+| Descripción | Un ingeniero accede al apartado de emergencias climáticas y genera una ruta con las solicitudes de tormenta más antiguas, para resolverlas con prioridad máxima. |
+| Actores | Principal: Operador, Jefe (gestión) / Administrador, Lector (solo consulta) / Secundario: SUA |
+| Precondiciones | El usuario inició sesión (CU-01) y existen solicitudes derivadas con la etiqueta de emergencia por tormenta. |
+| Postcondiciones | Éxito: queda armada una ruta de tormenta con las solicitudes más antiguas reservadas para ese ingeniero. / Fallo: no se genera ruta y las solicitudes de tormenta siguen disponibles. |
+
+### Secuencia normal
+
+| # | Acción (actor) | Reacción (sistema) |
+|---|----------------|--------------------|
+| 1 | El usuario observa el indicador animado que señala la existencia de emergencias por tormenta. | El sistema destaca el apartado de protocolo por tormenta como prioridad máxima. |
+| 2 | El usuario accede al protocolo por tormenta. | El sistema muestra exclusivamente las solicitudes etiquetadas como emergencia climática, que no figuran en el listado general.<br>• 2.1 Si el usuario tiene rol Administrador o Lector, el sistema deberá permitir únicamente la consulta, sin opción de generar ruta. |
+| 3 | El usuario indica la cantidad de solicitudes que quiere atender. | El sistema selecciona esa cantidad de solicitudes, priorizando las más antiguas primero y excluyendo las reservadas en rutas de otros ingenieros. |
+| 4 | El usuario confirma. | El sistema arma la ruta de tormenta, la muestra y reserva esas solicitudes. |
+| 5 | El usuario dictamina cada solicitud de la ruta. | El sistema procesa el dictamen con el mismo formulario que cualquier otro caso (CU-06). |
+
+### Excepciones
+
+| # | Situación | Respuesta del sistema |
+|---|-----------|-----------------------|
+| E1 | El dispositivo no tiene conexión al intentar generar la ruta de tormenta. | El sistema no permite la operación e informa que esa acción requiere conexión. |
+| E2 | La cantidad solicitada supera las solicitudes de tormenta disponibles. | El sistema arma la ruta con todas las disponibles e informa la cantidad efectivamente incluida. |
+| E3 | No hay solicitudes de tormenta pendientes. | El sistema muestra el apartado vacío y no exhibe el indicador de prioridad. |
+
+| Campo | Detalle |
+|-------|---------|
+| Rendimiento | El sistema deberá completar los pasos 3 y 4 con la misma agilidad que una ruta común, dada la urgencia del escenario. |
+| Frecuencia | Excepcional: solo ante eventos climáticos, con picos concentrados de solicitudes. |
+| Importancia | Vital |
+| Urgencia | Inmediatamente |
