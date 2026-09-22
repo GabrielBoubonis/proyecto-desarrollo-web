@@ -11,11 +11,15 @@ Ver [integrantes.md](integrantes.md)
 
 ## Descripción del proyecto
 
-_Breve descripción del sistema que el grupo está analizando y documentando._
+El sistema resuelve la etapa de dictaminación técnica de reclamos de arbolado público, una vez que estos ya fueron derivados a la Dirección Técnica de Arbolado dentro del SUA (Sistema Único de Atención). Permite a los ingenieros agrónomos consultar las solicitudes asignadas, armar una ruta de trabajo diaria, completar y firmar digitalmente el dictamen técnico correspondiente, y sincronizar el resultado con el SUA. También genera un dashboard de seguimiento para la Dirección. Opera como una aplicación web progresiva (PWA) instalable en los dispositivos móviles (captores) que la organización provee a los ingenieros, para poder trabajar sin conexión en el campo.
 
 ## Caso de estudio
 
-_Nombre del organismo o empresa comitente y contexto del problema que el sistema resuelve._
+**Organismo comitente:** Dirección General de Parques y Paseos — Municipalidad de Rosario.
+
+El proyecto surge de un relevamiento realizado durante 2025 (materia Práctica Profesionalizante I), en el cual se identificaron problemáticas y oportunidades de mejora en los procesos de la repartición. A partir de ese relevamiento, y con autorización de los directivos, se decidió desarrollar una herramienta complementaria — no una solución integral — orientada a atacar tres cuellos de botella concretos: los tiempos de campo de los ingenieros agrónomos, la carga manual "papel a digital" que realiza el Área de Procesamiento de Datos, y la despapelización institucional.
+
+El sistema no reemplaza al SUA (plataforma transversal a toda la Municipalidad); se integra con él como capa complementaria, filtrando únicamente los reclamos con el subtipo "Problema con el arbolado público", y queda desacoplado de los sistemas de autenticación institucional y de la base de reclamos del SUA mediante adaptadores, dado que en esta etapa de prototipo no se cuenta con acceso a los endpoints de producción.
 
 ## Entregas
 
