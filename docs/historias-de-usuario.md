@@ -24,11 +24,11 @@ _Cada historia debe incluir formato clásico, criterios de aceptación y validac
 | Criterio | ¿Se cumple? | Observación |
 |----------|-------------|-------------|
 | Independiente | Parcial | Es la base de la que dependen el resto de las historias (nadie puede dictaminar ni generar rutas sin loguearse antes). Es una dependencia estructural típica del módulo, no una dependencia de negocio arbitraria. |
-| Negociable | Sí | El mecanismo interno de validación (JWT, API key) puede ajustarse sin cambiar el valor entregado al usuario. |
-| Valiosa | Sí | Sin esto, ningún otro módulo del sistema es accesible. |
-| Estimable | Sí | El equipo cuenta con la información necesaria para dimensionar el esfuerzo. |
-| Pequeña | Sí | Se resuelve en un sprint corto. |
-| Verificable | Sí | Cada criterio de aceptación es un caso de prueba concreto. |
+| Negociable | Sí | El mecanismo interno de validación (JWT, API key contra la Autenticación Institucional) puede cambiarse sin afectar el criterio de aceptación 1, que solo exige que el acceso se otorgue si ambas validaciones son correctas. |
+| Valiosa | Sí | Se verifica con el criterio 1: sin un login exitoso, ninguna otra pantalla del sistema es alcanzable, lo que la vuelve bloqueante para el resto del backlog. |
+| Estimable | Sí | El equipo puede descomponerla en tareas concretas y conocidas (formulario, llamada a Autenticación Institucional, manejo del JWT) porque el mecanismo en dos pasos ya está definido en RF-01 y RF-02, sin puntos ambiguos pendientes. |
+| Pequeña | Sí | Se limita a 2 campos y dos validaciones secuenciales (RF-01 a RF-04); no incluye recuperación de contraseña ni alta de usuarios, que son parte de HU-02. |
+| Verificable | Sí | Se comprueba con el criterio 2: al enviar una contraseña incorrecta, la respuesta debe rechazar el acceso sin indicar cuál de los dos datos falló, verificable inspeccionando el mensaje de error devuelto por el sistema. |
 
 ---
 
@@ -51,12 +51,12 @@ _Cada historia debe incluir formato clásico, criterios de aceptación y validac
 
 | Criterio | ¿Se cumple? | Observación |
 |----------|-------------|-------------|
-| Independiente | Sí | Puede desarrollarse y probarse sin depender de otras historias funcionales del sistema (más allá del login propio del Administrador). |
-| Negociable | Sí | |
-| Valiosa | Sí | Sin esto no hay forma de dar de alta a nadie más en el sistema. |
-| Estimable | Sí | |
-| Pequeña | Sí | |
-| Verificable | Sí | |
+| Independiente | Sí | Se puede desarrollar y probar con un usuario Administrador de prueba, sin necesidad de que existan solicitudes, rutas o dictámenes cargados en el resto del sistema. |
+| Negociable | Sí | La forma de generar la contraseña temporal al restablecer (criterio 3) puede negociarse (aleatoria o definida por el Administrador) sin cambiar el valor de la historia: que el usuario recupere el acceso. |
+| Valiosa | Sí | Se verifica con el criterio 4: sin esta alta, no hay forma de que un nuevo ingeniero o Jefe obtenga acceso al sistema, dejando el trabajo operativo bloqueado. |
+| Estimable | Sí | El equipo puede estimarla porque las reglas de complejidad de contraseña ya están definidas sin ambigüedad en RNF-05. |
+| Pequeña | Sí | Se acota a alta, edición de rol y restablecimiento de contraseña de un usuario por vez (criterios 1 a 4); no incluye importación masiva ni auditoría de cambios. |
+| Verificable | Sí | Se comprueba con el criterio 2: al intentar crear un usuario con una contraseña que viole alguna regla de RNF-05, el sistema debe rechazar el alta e indicar el requisito faltante, verificable probando una contraseña que incumpla cada regla por separado. |
 
 ---
 
@@ -79,11 +79,11 @@ _Cada historia debe incluir formato clásico, criterios de aceptación y validac
 | Criterio | ¿Se cumple? | Observación |
 |----------|-------------|-------------|
 | Independiente | Parcial | Depende de que exista un login previo (HU-01). Es una dependencia estructural, no de negocio. |
-| Negociable | Sí | |
-| Valiosa | Sí | Es el punto de partida del trabajo diario del ingeniero. |
-| Estimable | Sí | |
-| Pequeña | Sí | |
-| Verificable | Sí | |
+| Negociable | Sí | La forma de mostrar el estado (ícono, color, texto) puede cambiar en el diseño de UI sin afectar el valor de la historia: que el ingeniero identifique qué solicitudes tiene disponibles. |
+| Valiosa | Sí | Se verifica con el criterio 1: es el paso previo obligatorio a generar una ruta o dictaminar, ya que ninguna de esas acciones puede iniciarse sin ver antes el listado. |
+| Estimable | Sí | El filtro de origen (RF-09) y los tres estados posibles (RF-11) ya están definidos con precisión, sin reglas de negocio pendientes de aclarar. |
+| Pequeña | Sí | Se limita a traer y mostrar datos de solo lectura (criterios 1 y 2); no incluye edición ni acciones sobre las solicitudes, que pertenecen a otras historias. |
+| Verificable | Sí | Se comprueba con el criterio 3: dos usuarios con rol distinto (Operador y Lector) deben recibir conjuntos de datos distintos, verificable comparando la respuesta del listado para cada uno. |
 
 ---
 
@@ -108,10 +108,10 @@ _Cada historia debe incluir formato clásico, criterios de aceptación y validac
 |----------|-------------|-------------|
 | Independiente | Parcial | Depende de HU-03 (ver solicitudes) y de HU-01 (login). Dependencia esperable dentro del flujo del sistema. |
 | Negociable | Sí | El algoritmo de optimización puede ajustarse sin cambiar el valor de la historia. |
-| Valiosa | Sí | |
+| Valiosa | Sí | Se verifica con el criterio 1: sin una ruta generada, el ingeniero tendría que elegir manualmente cada caso, perdiendo el objetivo de organizar la jornada de forma eficiente. |
 | Estimable | Parcial | El algoritmo de armado de ruta puede requerir un análisis técnico previo antes de poder estimarse con precisión. |
 | Pequeña | No del todo | Combina varios criterios de filtrado con selección manual en mapa, lo que la hace más grande que el resto de las historias. Podría dividirse por criterio si el equipo lo prefiere. |
-| Verificable | Sí | |
+| Verificable | Sí | Se comprueba con el criterio 2: al generar una segunda ruta después de que una solicitud ya quedó reservada en la primera, esa solicitud no debe aparecer en el resultado de la segunda, verificable comparando ambos listados. |
 
 ---
 
@@ -134,11 +134,11 @@ _Cada historia debe incluir formato clásico, criterios de aceptación y validac
 | Criterio | ¿Se cumple? | Observación |
 |----------|-------------|-------------|
 | Independiente | No | Depende directamente de HU-04 (no existe ruta para restablecer si no se generó antes). Se podría fusionar con HU-04 si el equipo prefiere una sola historia de "gestión de ruta". |
-| Negociable | Sí | |
+| Negociable | Sí | El texto exacto del mensaje de confirmación antes de restablecer puede ajustarse sin cambiar el comportamiento esperado: liberar las solicitudes no dictaminadas. |
 | Valiosa | Sí | Evita que un caso quede bloqueado indefinidamente para los demás ingenieros. |
-| Estimable | Sí | |
-| Pequeña | Sí | |
-| Verificable | Sí | |
+| Estimable | Sí | Reutiliza la misma lógica de reserva/liberación ya definida para HU-04, por lo que el esfuerzo adicional es acotado y conocido. |
+| Pequeña | Sí | Se limita a una acción de descarte y liberación (criterios 1 y 2); no agrega lógica nueva de armado de ruta, que ya existe en HU-04. |
+| Verificable | Sí | Se comprueba con el criterio 3: pasadas las 18:00 hs con solicitudes sin dictaminar en la ruta, estas deben quedar disponibles para otro ingeniero, verificable consultando el listado general después de esa hora. |
 
 ---
 
@@ -148,7 +148,7 @@ _Cada historia debe incluir formato clásico, criterios de aceptación y validac
 |-------|---------|
 | Historia | Como Operador, quiero completar y firmar digitalmente el dictamen técnico de una solicitud, para dejar registrada la intervención que corresponde sobre el ejemplar. |
 | Módulo | Dictaminación |
-| Requisitos relacionados | RF-20, RF-21, RF-22, RF-23, RF-24, RF-29 |
+| Requisitos relacionados | RF-20, RF-21, RF-22, RF-23, RF-24, RF-29, RF-45, RF-46 |
 
 ### Criterios de aceptación
 
@@ -156,17 +156,19 @@ _Cada historia debe incluir formato clásico, criterios de aceptación y validac
 2. Dado que otro ingeniero envía un dictamen para el mismo caso antes que yo, cuando intento enviar el mío, el sistema rechaza mi envío indicando que el caso ya fue dictaminado.
 3. Dado que el dictamen se firmó correctamente, el sistema envía al SUA el subconjunto de campos correspondiente a los "datos complementarios de la solicitud".
 4. El formulario del dictamen no muestra nombre ni datos de contacto del vecino, solo la información técnica necesaria (ubicación, descripción del reclamo).
+5. Dado que no adjunté ninguna fotografía del ejemplar, cuando intento firmar el dictamen, el sistema me lo impide y me indica que debo cargar al menos una foto.
+6. Dado que marco "Extracción" en el dictamen, el sistema deshabilita los campos de trabajos en la parte aérea y en la parte subterránea, para no dejar cargada una intervención incongruente con la extracción del ejemplar.
 
 ### Validación INVEST
 
 | Criterio | ¿Se cumple? | Observación |
 |----------|-------------|-------------|
 | Independiente | Parcial | Depende de HU-03/HU-04 (tener el caso disponible) y de HU-01 (login). Dependencia esperable del flujo. |
-| Negociable | Sí | |
-| Valiosa | Sí | Es la funcionalidad central del sistema. |
-| Estimable | Sí | |
+| Negociable | Sí | El algoritmo exacto de hash puede decidirse técnicamente sin alterar el criterio de aceptación 1, que solo exige que el dictamen quede firmado con usuario y timestamp. |
+| Valiosa | Sí | Se verifica con el criterio 1: es la acción que efectivamente resuelve el reclamo del vecino y genera el documento con valor legal; sin ella, el resto del sistema no tiene salida. |
+| Estimable | Sí | Las reglas de firma (RF-22) y de exclusión por ejemplar único (RF-21) ya están definidas con precisión suficiente para descomponer la tarea en partes conocidas. |
 | Pequeña | No del todo | Agrupa firma digital, persistencia local y envío al SUA en una sola historia. Podría dividirse en "completar y firmar" vs. "enviar al SUA" si el equipo prefiere historias más chicas. |
-| Verificable | Sí | |
+| Verificable | Sí | Se comprueba con el criterio 2: si dos usuarios envían un dictamen para el mismo Número de SUA-Año casi al mismo tiempo, solo el primero en confirmar debe quedar registrado y el segundo debe recibir un rechazo explícito, verificable con una prueba de envíos concurrentes. |
 
 ---
 
@@ -188,12 +190,12 @@ _Cada historia debe incluir formato clásico, criterios de aceptación y validac
 
 | Criterio | ¿Se cumple? | Observación |
 |----------|-------------|-------------|
-| Independiente | Sí | Puede desarrollarse una vez que existe un dictamen firmado, sin acoplarse al resto de la lógica de negocio. |
-| Negociable | Sí | |
-| Valiosa | Sí | Resuelve una necesidad operativa concreta: el documento legal impreso. |
-| Estimable | Sí | |
-| Pequeña | Sí | |
-| Verificable | Sí | |
+| Independiente | Sí | Se puede desarrollar una vez que existe al menos un dictamen firmado de prueba, sin acoplarse a la lógica de rutas ni de sincronización. |
+| Negociable | Sí | El diseño visual del documento (orden de campos, tipografía) puede ajustarse sin cambiar el valor de la historia: entregar un documento imprimible con validez legal. |
+| Valiosa | Sí | Se verifica con el criterio 1: resuelve una necesidad operativa real y explícita del usuario (imprimir el documento legal), no una mejora accesoria. |
+| Estimable | Sí | Depende de datos que ya existen en el dictamen firmado (RF-22, RF-23), sin necesidad de generar información nueva para armar el documento. |
+| Pequeña | Sí | Se limita a tomar un dictamen ya firmado y renderizarlo como archivo (criterios 1 y 2); no incluye edición ni una nueva firma. |
+| Verificable | Sí | Se comprueba con el criterio 2: el archivo descargado debe contener el mismo hash, timestamp y usuario que figuran en el dictamen almacenado, verificable comparando ambos valores campo por campo. |
 
 ---
 
@@ -216,11 +218,11 @@ _Cada historia debe incluir formato clásico, criterios de aceptación y validac
 | Criterio | ¿Se cumple? | Observación |
 |----------|-------------|-------------|
 | Independiente | Parcial | Depende de que exista al menos un dictamen previo del caso (HU-06). Es una dependencia de datos, no de desarrollo. |
-| Negociable | Sí | |
-| Valiosa | Sí | Da contexto al ingeniero y evita desconocer el historial del ejemplar. |
-| Estimable | Sí | |
-| Pequeña | Sí | |
-| Verificable | Sí | |
+| Negociable | Sí | La forma de presentar el dictamen anterior (modal o pantalla aparte) puede decidirse en el diseño de UI sin afectar el criterio de aceptación: que el ingeniero pueda consultarlo sin perder el formulario nuevo. |
+| Valiosa | Sí | Se verifica con el criterio 2: le da al ingeniero el contexto de lo evaluado la vez anterior antes de decidir la nueva intervención, evitando que repita un diagnóstico ya descartado. |
+| Estimable | Sí | Reutiliza el historial de dictámenes que ya debe existir por RF-27, por lo que no depende de una fuente de datos nueva. |
+| Pequeña | Sí | Se limita a mostrar datos de solo lectura de un dictamen ya existente (criterio 2); no permite editarlo ni reutilizarlo como base del nuevo. |
+| Verificable | Sí | Se comprueba con el criterio 1: al abrir un caso Pendiente-revisión, el formulario nuevo no debe traer ningún valor precargado del dictamen anterior, verificable inspeccionando los campos vacíos al ingresar. |
 
 ---
 
@@ -243,11 +245,11 @@ _Cada historia debe incluir formato clásico, criterios de aceptación y validac
 | Criterio | ¿Se cumple? | Observación |
 |----------|-------------|-------------|
 | Independiente | Parcial | Depende de HU-04 (ruta generada con conexión previa) y de HU-06 (lógica de completar/firmar dictamen). |
-| Negociable | Sí | |
-| Valiosa | Sí | Es una necesidad real del trabajo de campo, no una mejora accesoria. |
+| Negociable | Sí | El mecanismo técnico de almacenamiento local puede decidirse en el diseño sin afectar el criterio de aceptación: que el dictamen quede firmado y guardado aunque no haya señal. |
+| Valiosa | Sí | Se verifica con el criterio 1: sin esto, un ingeniero en una zona sin señal simplemente no podría trabajar, lo cual contradice una condición real y frecuente del trabajo de campo. |
 | Estimable | Parcial | Depende de decisiones técnicas de almacenamiento local (Service Worker, IndexedDB) que pueden requerir un análisis previo. |
-| Pequeña | Sí | Dentro de lo que permite el alcance offline definido. |
-| Verificable | Sí | |
+| Pequeña | Sí | Dentro de lo que permite el alcance offline definido: se limita a firmar y guardar localmente (criterio 2), sin incluir la lógica de reintento de envío, que es de HU-10. |
+| Verificable | Sí | Se comprueba con el criterio 2: al firmar un dictamen en modo avión, debe quedar visible en el dispositivo con estado 'pendiente de sincronizar', verificable revisando la cola local sin reconectar. |
 
 ---
 
@@ -270,11 +272,11 @@ _Cada historia debe incluir formato clásico, criterios de aceptación y validac
 | Criterio | ¿Se cumple? | Observación |
 |----------|-------------|-------------|
 | Independiente | Parcial | Depende de HU-09 (que existan dictámenes offline para sincronizar). Son dos caras del mismo flujo, separadas para que cada una sea más chica y verificable por separado. |
-| Negociable | Sí | |
-| Valiosa | Sí | Sin esto, el trabajo offline no se traduce nunca en datos reales en el SUA. |
-| Estimable | Sí | |
-| Pequeña | Sí | |
-| Verificable | Sí | |
+| Negociable | Sí | La frecuencia exacta de reintento puede ajustarse técnicamente sin cambiar el valor de la historia: que el envío ocurra sin intervención manual del usuario. |
+| Valiosa | Sí | Se verifica con el criterio 1: sin esto, el trabajo hecho sin conexión (HU-09) nunca llegaría al SUA, y el ingeniero debería recordar reenviarlo manualmente. |
+| Estimable | Sí | Reutiliza el mecanismo de reintento que ya debía existir para el caso 'SUA caído' (RF-25), por lo que no es una lógica nueva desde cero. |
+| Pequeña | Sí | Se limita a la lógica de reintento y al indicador de estado (criterios 1 y 3); no incluye la firma del dictamen en sí, que pertenece a HU-09. |
+| Verificable | Sí | Se comprueba con el criterio 1: al simular la recuperación de conexión con dictámenes en cola, estos deben quedar sincronizados en el SUA sin ninguna acción del usuario, verificable comparando el estado antes y después de reconectar. |
 
 ---
 
@@ -297,11 +299,11 @@ _Cada historia debe incluir formato clásico, criterios de aceptación y validac
 | Criterio | ¿Se cumple? | Observación |
 |----------|-------------|-------------|
 | Independiente | Parcial | Depende de que existan datos generados por los módulos de solicitudes y dictaminación. Es una dependencia de datos, no de desarrollo del propio módulo. |
-| Negociable | Sí | |
-| Valiosa | Sí | Es la herramienta de seguimiento para la Dirección. |
-| Estimable | Sí | |
-| Pequeña | Sí | |
-| Verificable | Sí | |
+| Negociable | Sí | El tipo de visualización (números, barras o líneas) puede decidirse en el diseño de UI sin afectar el valor de la historia: que el Jefe pueda seguir el trabajo del equipo por período. |
+| Valiosa | Sí | Se verifica con el criterio 1: es la única herramienta que le permite a la Dirección medir el trabajo del área sin pedirlo manualmente a cada ingeniero. |
+| Estimable | Sí | Se apoya en datos que ya deben existir por los módulos de solicitudes y dictaminación (RF-35 a RF-37), sin necesidad de calcular métricas nuevas no definidas. |
+| Pequeña | Sí | Se limita a las tres métricas base y el filtro por mes/año (criterios 1 y 2); no incluye métricas adicionales, marcadas como pendientes a futuro en Alcance. |
+| Verificable | Sí | Se comprueba con el criterio 3: una solicitud re-derivada por vencimiento debe sumar +1 en el período de la re-derivación además de haber sumado +1 en el período original, verificable revisando ambos cortes de mes por separado. |
 
 ---
 
@@ -326,8 +328,8 @@ _Cada historia debe incluir formato clásico, criterios de aceptación y validac
 | Criterio | ¿Se cumple? | Observación |
 |----------|-------------|-------------|
 | Independiente | Parcial | Reutiliza la lógica de rutas y dictaminación ya construida en HU-04 y HU-06; depende de que esos módulos existan. |
-| Negociable | Sí | |
-| Valiosa | Sí | Resuelve la necesidad operativa de priorizar emergencias climáticas por sobre el trabajo habitual. |
-| Estimable | Sí | |
-| Pequeña | Sí | Al reutilizar la lógica de rutas y dictaminación, el esfuerzo adicional es acotado (filtro, orden por antigüedad, indicador visual). |
-| Verificable | Sí | |
+| Negociable | Sí | La cantidad máxima de solicitudes por ruta de tormenta puede ajustarse sin cambiar el valor de la historia: atender primero las emergencias más urgentes. |
+| Valiosa | Sí | Se verifica con el criterio 2: el indicador de máxima prioridad evita que una emergencia climática quede mezclada y postergada entre el trabajo habitual. |
+| Estimable | Sí | Reutiliza la lógica ya estimada de HU-04 (armado de ruta) y HU-06 (dictaminación), por lo que el esfuerzo adicional es acotado y conocido. |
+| Pequeña | Sí | Al reutilizar la lógica de rutas y dictaminación ya construida, el esfuerzo adicional se limita al filtro por antigüedad y al indicador visual (criterios 2 y 3). |
+| Verificable | Sí | Se comprueba con el criterio 3: al pedir una ruta de tormenta de 5 solicitudes, el sistema debe incluir las 5 con la fecha de derivación más antigua entre las disponibles, verificable ordenando el listado completo por fecha y comparando. |

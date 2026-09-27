@@ -1,31 +1,160 @@
-@startuml
-title Modelo Entidad-Relación - [Nombre del Sistema]
+@startuml er-modelo
+title Sistema de Dictaminación Técnica de Arbolado Público — Modelo Entidad-Relación
 
-' --- Entidades ---
-entity Entidad1 {
-  * id_entidad1 : integer <<PK>>
-  --
-  atributo1 : varchar
-  atributo2 : varchar
+skinparam linetype ortho
+skinparam roundcorner 8
+skinparam class {
+  BackgroundColor White
+  BorderColor #333333
+  ArrowColor #333333
 }
 
-entity Entidad2 {
-  * id_entidad2 : integer <<PK>>
+entity "Usuario" as usuario {
+  * nombre_usuario : PK
   --
-  atributo1 : varchar
-  id_entidad1 : integer <<FK>>
+  contraseña_hash
+  rol
+  activo
+  fecha_alta
 }
 
-entity Entidad3 {
-  * id_entidad3 : integer <<PK>>
+entity "Solicitud" as solicitud {
+  * numero_sua : PK
+  * anio : PK
   --
-  atributo1 : varchar
-  id_entidad1 : integer <<FK>>
+  distrito
+  prioridad
+  direccion
+  descripcion_reclamo
+  estado
+  es_tormenta
+  fecha_ultima_derivacion
 }
 
-' --- Relaciones ---
-' Sintaxis: EntidadA [cardinalidad] -- [cardinalidad] EntidadB : "etiqueta"
-Entidad1 ||--o{ Entidad2 : "relación"
-Entidad1 ||--o{ Entidad3 : "relación"
+entity "HistorialDerivacion" as historial {
+  * id_derivacion : PK
+  --
+  numero_sua : FK
+  anio : FK
+  fecha_derivacion
+  motivo
+}
+
+entity "Dictamen" as dictamen {
+  * id_dictamen : PK
+  --
+  numero_sua : FK
+  anio : FK
+  nombre_usuario : FK
+  nota_numero
+  expediente_numero
+  fecha_emision
+  domicilio_ejemplar
+  calle_esquina
+  numero_esquina
+  referencia_ubicacion
+  especie
+  distancia_medianera_referencia
+  cantidad_frente
+  nivel_dano_vereda
+  --
+  es_extraccion
+  perimetro_tronco
+  motivo_extraccion
+  --
+  es_sin_trabajo
+  motivo_sin_trabajo
+  --
+  complejidad
+  urgente
+  arbol_frente_garage
+  media_tension
+  de_oficio
+  plantar
+  --
+  observaciones
+  hash_firma
+  estado_sincronizacion
+}
+
+note right of dictamen
+  <b>Regla de validación — exclusión extracción/trabajos</b>
+  Si es_extraccion = true, el sistema NO debe permitir
+  que este Dictamen tenga filas asociadas en
+  TrabajoAereo ni en TrabajoSubterraneo (sería
+  incongruente podar o intervenir raíces sobre un
+  ejemplar que se va a extraer). El modelo relacional
+  no lo impide por sí solo (no hay una restricción de
+  base de datos que lo exprese de forma directa): es
+  una regla de negocio que valida la aplicación antes
+  de guardar o firmar el dictamen.
+  Ver Decisión 5 en er_modelo.md y RF-46 en requisitos.md.
+  --
+  <b>complejidad</b> es la complejidad de la intervención
+  a realizar, un dato propio del dictamen (Baja / Media /
+  Alta / Máxima). No interviene en los criterios de
+  generación de rutas (RF-15): son dos conceptos
+  independientes.
+  --
+  <b>Fotografia es obligatoria</b>: no se puede firmar un
+  Dictamen sin al menos una fila asociada en Fotografia
+  (RF-45). Ver relación más abajo.
+end note
+
+entity "Fotografia" as foto {
+  * id_foto : PK
+  --
+  id_dictamen : FK
+  archivo_referencia
+  orden
+}
+
+entity "TrabajoAereo" as trabajo_aereo {
+  * id_trabajo_aereo : PK
+  --
+  id_dictamen : FK
+  tipo_trabajo
+}
+
+entity "TrabajoSubterraneo" as trabajo_subterraneo {
+  * id_trabajo_subterraneo : PK
+  --
+  id_dictamen : FK
+  tipo_trabajo
+  distancia_borde
+}
+
+entity "Ruta" as ruta {
+  * id_ruta : PK
+  --
+  nombre_usuario : FK
+  fecha
+  tipo
+  estado
+}
+
+entity "RutaSolicitud" as ruta_solicitud {
+  * id_ruta : PK, FK
+  * numero_sua : PK, FK
+  * anio : PK, FK
+  --
+  fecha_incorporacion
+  liberada
+  fecha_liberacion
+}
+
+usuario ||--o{ dictamen : firma
+usuario ||--o{ ruta : genera
+
+solicitud ||--o{ dictamen : "tiene historial de"
+solicitud ||--o{ historial : "registra derivaciones"
+
+dictamen ||--o{ foto : "incluye (mínimo 1, obligatoria)"
+dictamen ||--o{ trabajo_aereo : "incluye (0..N, excluyente con es_extraccion)"
+dictamen ||--o{ trabajo_subterraneo : "incluye (0..N, excluyente con es_extraccion)"
+
+ruta ||--o{ ruta_solicitud : agrupa
+solicitud ||--o{ ruta_solicitud : "pertenece a"
 
 @enduml
+
