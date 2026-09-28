@@ -148,9 +148,14 @@ quede claro que el formulario completo no es corto:
    (Baja/Media/Alta/Máxima), casilleros Urgente / Árbol frente a garage / Media tensión /
    De oficio, Plantar (Cazuela / Construir cazuela / Vereda jardín / ninguna), y el
    selector de **fotografías del ejemplar\* (mínimo 1, obligatorio)**.
-5. **Observaciones y firma** — Observaciones (texto libre), resumen de lo cargado en los
-   4 pasos anteriores, y el botón que dispara la firma digital (hash + timestamp +
-   usuario).
+5. **Observaciones y firma** — **Nivel de prioridad de la intervención\*** (Alta/Media/Baja:
+   la urgencia con la que hay que *ejecutar* lo dictaminado, no confundir con la prioridad
+   de triage de la Solicitud que ya se usó para armar la ruta — ver Decisión 6 en
+   `er_modelo.md`), Observaciones (texto libre), resumen de lo cargado en los 4 pasos
+   anteriores, y el botón que dispara la firma digital (hash + timestamp + usuario). El
+   nivel de prioridad se completa deliberadamente acá y no junto a "Complejidad" del Paso 4:
+   es la última decisión técnica que el ingeniero toma, ya con el diagnóstico completo,
+   justo antes de firmar — un paso propio en vez de un campo más entre los demás.
 
 El indicador de "SIN SEÑAL" en el encabezado no es decorativo: comunica en todo momento si
 el dictamen que está por firmar se va a guardar localmente en estado pendiente de
@@ -173,7 +178,8 @@ ingeniero está tomando la decisión, no varios pasos después.
   si falta completar alguno (RF-20); verificación de que no exista ya un dictamen activo
   para el mismo ejemplar al momento de confirmar el envío (RF-21); bloqueo de trabajos
   aéreos/subterráneos si se marcó Extracción (RF-46); al menos una fotografía cargada antes
-  de poder firmar (RF-45).
+  de poder firmar (RF-45); nivel de prioridad de la intervención obligatorio antes de
+  habilitar el botón de firma (Paso 5).
 
 ---
 

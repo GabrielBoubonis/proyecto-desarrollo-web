@@ -72,6 +72,7 @@ entity "Dictamen" as dictamen {
   de_oficio
   plantar
   --
+  nivel_prioridad
   observaciones
   hash_firma
   estado_sincronizacion
@@ -99,6 +100,15 @@ note right of dictamen
   <b>Fotografia es obligatoria</b>: no se puede firmar un
   Dictamen sin al menos una fila asociada en Fotografia
   (RF-45). Ver relación más abajo.
+  --
+  <b>nivel_prioridad</b> (Alta/Media/Baja) es la urgencia
+  con la que hay que EJECUTAR la intervención ya
+  dictaminada (la define el ingeniero al cerrar el
+  dictamen). No es lo mismo que Solicitud.prioridad, que
+  es la prioridad de TRIAGE asignada al crear el reclamo
+  y se usa para armar rutas (RF-15). Se ubica al final del
+  formulario, junto a observaciones, como el último dato
+  que se define justo antes de firmar. Ver Decisión 6.
 end note
 
 entity "Fotografia" as foto {
@@ -157,4 +167,3 @@ ruta ||--o{ ruta_solicitud : agrupa
 solicitud ||--o{ ruta_solicitud : "pertenece a"
 
 @enduml
-

@@ -39,7 +39,10 @@ _Visualizar en [plantuml.com](https://www.plantuml.com/plantuml/uml/)._
 - `numero_sua` (PK, compuesta con `anio`): número que asigna el SUA al reclamo.
 - `anio` (PK, compuesta con `numero_sua`): año de creación **original** de la solicitud en
   el SUA. No cambia aunque el caso se re-derive años después (ver Alcance, sección 2.4).
-- `distrito`, `prioridad`: usados para el armado de rutas (RF-15).
+- `distrito`, `prioridad`: usados para el armado de rutas (RF-15). `prioridad` es la
+  prioridad de **triage** al momento de crear el reclamo — no confundir con
+  `Dictamen.nivel_prioridad`, que es la urgencia de ejecución que define el ingeniero
+  después de dictaminar (ver Decisión 6).
 - `direccion`: domicilio de la solicitud tal como lo reporta el SUA (puede no coincidir con
   la ubicación exacta del ejemplar; ver `domicilio_ejemplar` en Dictamen).
 - `descripcion_reclamo`: texto técnico del problema reportado, sin datos personales del
@@ -95,6 +98,14 @@ _Visualizar en [plantuml.com](https://www.plantuml.com/plantuml/uml/)._
   alcance: acá el dictamen ya parte de una Solicitud existente derivada por el SUA, este
   campo solo documenta el origen para el registro legal.
 - `plantar`: Cazuela / Construir cazuela / Vereda jardín / ninguna. **Opcional.**
+- `nivel_prioridad`: Alta/Media/Baja. **Obligatorio.** Es la urgencia con la que hay que
+  **ejecutar** la intervención ya dictaminada (por ejemplo, una poda de riesgo eléctrico
+  puede necesitar resolverse antes que una de mantenimiento estético), definida por el
+  ingeniero al cerrar el dictamen. No debe confundirse con `Solicitud.prioridad`, que es la
+  prioridad de **triage** asignada por quien recibe el reclamo y se usa para armar rutas
+  (RF-15) — son dos momentos y dos criterios distintos. Se ubica al final del formulario,
+  junto a `observaciones`, como el último dato que se completa antes de firmar. Ver
+  Decisión 6.
 - `observaciones`: texto libre. **Opcional.**
 - `hash_firma`, `estado_sincronizacion`: generados por el sistema al firmar, no los completa
   el usuario (RF-22, RF-25).
@@ -220,3 +231,27 @@ Esta regla queda documentada como requisito funcional en `requisitos.md` (RF-46)
 representada como nota sobre la entidad Dictamen en el diagrama (`diagramas/er.puml`), ya
 que el modelo entidad-relación en sí no tiene una forma nativa de expresar "estas dos
 relaciones son mutuamente excluyentes según el valor de un atributo del lado uno".
+
+### Decisión 6 — Dos campos de prioridad, con significados distintos, en dos entidades distintas
+
+`Solicitud.prioridad` y `Dictamen.nivel_prioridad` podrían leerse como un campo duplicado,
+así que vale la pena dejar explícita la diferencia entre ambos:
+
+- **`Solicitud.prioridad`** es una prioridad de **triage**: la asigna quien recibe el
+  reclamo, **antes** de que cualquier ingeniero haya visto el ejemplar, y su único uso es
+  ayudar a armar rutas de trabajo (RF-15) — responde a la pregunta "¿qué casos conviene
+  visitar primero?".
+- **`Dictamen.nivel_prioridad`** es una prioridad de **ejecución operativa**: la asigna el
+  ingeniero recién al cerrar el dictamen, **después** de haber inspeccionado el ejemplar en
+  persona, y responde a una pregunta distinta: "ya que se determinó qué intervención
+  corresponde, ¿con qué urgencia hay que efectivamente hacerla?" (por ejemplo, una
+  liberación de conductores eléctricos puede requerir resolverse antes que una poda de
+  formación, aunque ambas solicitudes hayan entrado con la misma prioridad de triage).
+
+Se decidió no unificarlos en un solo campo porque representan decisiones tomadas por
+personas distintas, en momentos distintos, con información distinta disponible (antes y
+después de la inspección en el lugar), y ambos quedan documentados: el de triage en el
+historial de la Solicitud, el de ejecución en el documento legal firmado. Por eso
+`nivel_prioridad` se ubica al final del formulario del dictamen, junto a `observaciones`,
+como el último criterio que el ingeniero define justo antes de firmar — es una instancia
+distinta a la de generación de rutas y así se lo tiene que percibir en la interfaz.
