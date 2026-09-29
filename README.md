@@ -1,4 +1,4 @@
-# [Nombre del Sistema] — Grupo [N]
+# Sistema de Dictaminacion — Grupo N°1
 
 > Materia: Diseño de Sistemas Web — Analista Funcional de Sistemas  
 > Institución: Terciario Urquiza — Rosario  

@@ -46,6 +46,9 @@ poder trabajar sin conexión en el campo.
 | RF-17 | El sistema debe liberar automáticamente una solicitud reservada en una ruta cuando: se dictamina, el ingeniero presiona "Restablecer", o son las 18:00 hs del día. |
 | RF-18 | El sistema debe permitir a un ingeniero descartar su ruta completa mediante el botón "Restablecer", liberando las solicitudes no dictaminadas. |
 | RF-19 | El sistema debe requerir conexión a internet para generar o confirmar una ruta (no disponible en modo offline). |
+| RF-47 | Cuando la cantidad de solicitudes que cumplen los criterios definidos (RF-15) supere el cupo indicado por el ingeniero, el sistema debe seleccionar cuáles incluir combinando antigüedad de la solicitud (mayor preferencia a las más antiguas) y eficiencia del recorrido resultante (menor tiempo y distancia total según el modo de desplazamiento). |
+| RF-48 | El sistema debe calcular el orden de visita de las solicitudes de una ruta minimizando el tiempo y la distancia total del recorrido, tomando como punto de partida y de cierre del cálculo la sede de la Dirección General de Parques y Paseos. |
+| RF-49 | El sistema debe permitir seleccionar el modo de desplazamiento (a pie o en vehículo) como criterio adicional al generar la ruta, y calcular el tiempo y la distancia en función del modo elegido. |
 
 ### Módulo 4 — Dictaminación
 
@@ -129,4 +132,4 @@ poder trabajar sin conexión en el campo.
 |----|-----------|
 | RNF-12 | El sistema debe funcionar como PWA instalable en dispositivos Android (captores provistos por la organización). |
 | RNF-13 | El sistema no requiere soporte para iOS, dado que los dispositivos de campo son exclusivamente Android. |
-| RNF-14 | El sistema debe utilizar un servicio de mapas/geolocalización de uso gratuito para la generación de rutas. |
+| RNF-14 | El sistema debe utilizar un servicio de mapas/geolocalización de uso gratuito para la generación de rutas, que soporte el cálculo de distancia y tiempo estimado tanto a pie como en vehículo. |

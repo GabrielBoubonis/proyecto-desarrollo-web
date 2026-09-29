@@ -91,12 +91,22 @@ que tiene que ser visible sin necesidad de entrar a ninguna otra pantalla.
 Modal.
 
 **Justificación:** A diferencia del dictamen (pantalla 4), este formulario **no es largo**:
-son solo 3 criterios independientes (distrito, prioridad, zona en el mapa), todos
-opcionales. Dividirlo en pasos secuenciales sería una fricción innecesaria para algo que el
-ingeniero completa en segundos y puede querer ajustar de un lado a otro sin "avanzar" y
-"retroceder" entre pantallas. Por eso se agrupan las tres secciones en una sola pantalla,
-con un resumen en vivo ("8 solicitudes cumplen estos criterios") que se actualiza a medida
-que se ajustan los filtros.
+son 4 criterios (distrito, prioridad, zona en el mapa y modo de desplazamiento), de los
+cuales solo el modo de desplazamiento es obligatorio. Dividirlo en pasos secuenciales sería
+una fricción innecesaria para algo que el ingeniero completa en segundos y puede querer
+ajustar de un lado a otro sin "avanzar" y "retroceder" entre pantallas. Por eso se agrupan
+las cuatro secciones en una sola pantalla, con un resumen en vivo ("8 solicitudes cumplen
+estos criterios") que se actualiza a medida que se ajustan los filtros.
+
+El selector **Modo de desplazamiento** (a pie / vehículo) se resuelve con un toggle de dos
+opciones, no con un desplegable, porque son solo dos valores mutuamente excluyentes y
+siempre debe haber uno seleccionado (RF-49) — el toggle deja visualmente claro cuál está
+activo sin necesidad de abrir nada. Es el único campo obligatorio de la pantalla porque
+condiciona directamente el cálculo de tiempo y distancia que usa el sistema tanto para
+seleccionar qué solicitudes entran en la ruta (cuando hay más candidatas que cupo, RF-47)
+como para ordenar su visita (RF-48); por eso el modal de confirmación repite el modo
+elegido ("para tu ruta de hoy, a pie"), para que quede claro antes de reservar las
+solicitudes.
 
 El Modal de confirmación sí se mantiene, porque cumple la función exacta que define el
 patrón: una acción puntual (confirmar la generación) que no amerita una pantalla nueva,
@@ -104,13 +114,15 @@ pero que necesita una confirmación explícita porque tiene un efecto colateral 
 reserva esas solicitudes y las saca de la disponibilidad de otros ingenieros (RF-16).
 
 **Formulario (si aplica):**
-- Cantidad de campos: 3 criterios combinables (distrito, prioridad, zona en mapa), todos
-  opcionales salvo que al menos uno esté definido.
+- Cantidad de campos: 4 criterios (distrito, prioridad, zona en mapa, modo de
+  desplazamiento). Los tres primeros son opcionales entre sí; el modo de desplazamiento es
+  obligatorio.
 - Flujo: todos los criterios juntos en una sola pantalla (no por pasos), con confirmación
   final en un Modal.
-- Validaciones relevantes: si no hay solicitudes que cumplan los criterios elegidos, el
-  sistema lo indica en el resumen antes de habilitar "Generar ruta" (ver CU-04, excepción
-  E2).
+- Validaciones relevantes: el botón "Generar ruta" no se habilita sin un modo de
+  desplazamiento elegido (RF-49); si no hay solicitudes que cumplan los demás criterios
+  elegidos, el sistema lo indica en el resumen antes de habilitar "Generar ruta" (ver CU-04,
+  excepción E2).
 
 ---
 

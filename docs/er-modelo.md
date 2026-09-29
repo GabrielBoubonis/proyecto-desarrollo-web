@@ -148,6 +148,9 @@ _Visualizar en [plantuml.com](https://www.plantuml.com/plantuml/uml/)._
 - `fecha`: día de la jornada a la que corresponde.
 - `tipo`: Normal o Tormenta.
 - `estado`: Activa / Restablecida.
+- `modo_desplazamiento`: Caminando / Vehículo. Lo elige el ingeniero al generar la ruta
+  (RF-49) y determina cómo se calculan el tiempo y la distancia del recorrido para
+  seleccionar y ordenar las solicitudes (RF-47, RF-48). Ver Decisión 7.
 
 ### RutaSolicitud
 
@@ -255,3 +258,36 @@ historial de la Solicitud, el de ejecución en el documento legal firmado. Por e
 `nivel_prioridad` se ubica al final del formulario del dictamen, junto a `observaciones`,
 como el último criterio que el ingeniero define justo antes de firmar — es una instancia
 distinta a la de generación de rutas y así se lo tiene que percibir en la interfaz.
+
+### Decisión 7 — Selección y orden de las solicitudes de una ruta, y modo de desplazamiento
+
+Hasta una revisión posterior del documento, RF-15 definía únicamente *con qué criterios* se
+arma una ruta (distrito, prioridad, zona), pero no explicaba *qué* pasa cuando las
+solicitudes que cumplen esos criterios superan el cupo pedido, ni *cómo* se ordena la
+visita entre las seleccionadas. Se resolvió de la siguiente manera:
+
+- **Selección (RF-47):** cuando hay más solicitudes candidatas que cupo, el sistema
+  combina dos factores para decidir cuáles incluir: **antigüedad** de la solicitud
+  (preferencia a las más antiguas, el mismo criterio que ya se usaba en el Protocolo por
+  tormenta, RF-41) y **eficiencia del recorrido resultante** (menor tiempo y distancia
+  total). No se usa un único criterio (por ejemplo, solo antigüedad) porque eso podría
+  producir una ruta geográficamente muy ineficiente; tampoco se usa solo eficiencia, porque
+  podría postergar indefinidamente una solicitud antigua que quede "fuera de camino".
+- **Orden de visita (RF-48):** una vez seleccionadas, el sistema calcula el orden que
+  minimiza tiempo y distancia, tomando como punto de partida y de cierre del cálculo la
+  sede de la Dirección General de Parques y Paseos. Es un objetivo de cálculo, no una
+  obligación operativa: los ingenieros agrónomos no están obligados a marcar el regreso a
+  la sede al final de la jornada (a diferencia de otros roles que sí lo hacen), por lo que
+  el circuito no siempre se cierra en la práctica.
+- **Modo de desplazamiento (RF-49, atributo `Ruta.modo_desplazamiento`):** el ingeniero no
+  siempre se desplaza de la misma forma — la mayoría de las veces camina, pero en ciertos
+  casos usa un vehículo de la Dirección. Como el tiempo y la distancia de un mismo
+  recorrido varían mucho según el modo, se decidió modelarlo como un atributo propio de
+  `Ruta` (no de `Usuario` ni de `Dictamen`), elegido por el ingeniero al momento de generar
+  cada ruta, para que el cálculo de selección y orden use el modo correcto en cada caso.
+- **Fuera de alcance:** el cálculo de consumo de combustible no se modela ni se persiste;
+  el sistema solo usa el modo de desplazamiento para estimar tiempo y distancia.
+- El algoritmo concreto (heurística de ruteo, servicio de mapas usado) queda como decisión
+  técnica de implementación — ver RNF-14 y la validación INVEST de HU-04 en
+  `historias_usuario.md`, donde se deja explícito que esto puede requerir un análisis
+  técnico previo.

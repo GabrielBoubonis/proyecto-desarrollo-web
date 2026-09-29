@@ -93,7 +93,7 @@ _Cada historia debe incluir formato clásico, criterios de aceptación y validac
 |-------|---------|
 | Historia | Como Operador, quiero generar una ruta de trabajo con los criterios que yo elija, para organizar mi jornada de forma eficiente según cómo prefiero trabajar. |
 | Módulo | Generación de rutas de trabajo |
-| Requisitos relacionados | RF-14, RF-15, RF-16, RF-19 |
+| Requisitos relacionados | RF-14, RF-15, RF-16, RF-19, RF-47, RF-48, RF-49 |
 
 ### Criterios de aceptación
 
@@ -101,16 +101,18 @@ _Cada historia debe incluir formato clásico, criterios de aceptación y validac
 2. Dado que una solicitud ya forma parte de la ruta activa de otro ingeniero, esa solicitud no aparece disponible para incluirse en mi nueva ruta.
 3. Dado que no tengo conexión a internet, cuando intento generar una ruta, el sistema no permite la operación e informa que se necesita conexión.
 4. Dado que elijo no filtrar por distrito, el sistema igual arma la ruta considerando el resto de los criterios seleccionados.
+5. Dado que genero una ruta, debo indicar el modo de desplazamiento (a pie o en vehículo), y el sistema calcula el tiempo y la distancia del recorrido en función de ese modo.
+6. Dado que las solicitudes que cumplen mis criterios superan la cantidad que pedí, el sistema selecciona cuáles incluir combinando antigüedad (las más antiguas primero) y eficiencia del recorrido resultante, y ordena su visita minimizando tiempo y distancia desde la sede de la Dirección General de Parques y Paseos.
 
 ### Validación INVEST
 
 | Criterio | ¿Se cumple? | Observación |
 |----------|-------------|-------------|
 | Independiente | Parcial | Depende de HU-03 (ver solicitudes) y de HU-01 (login). Dependencia esperable dentro del flujo del sistema. |
-| Negociable | Sí | El algoritmo de optimización puede ajustarse sin cambiar el valor de la historia. |
+| Negociable | Sí | El algoritmo concreto que resuelve la selección y el orden (por ejemplo, qué heurística de ruteo usar) puede ajustarse sin cambiar el valor de la historia, siempre que respete el objetivo ya definido: combinar antigüedad y eficiencia (RF-47, RF-48). |
 | Valiosa | Sí | Se verifica con el criterio 1: sin una ruta generada, el ingeniero tendría que elegir manualmente cada caso, perdiendo el objetivo de organizar la jornada de forma eficiente. |
-| Estimable | Parcial | El algoritmo de armado de ruta puede requerir un análisis técnico previo antes de poder estimarse con precisión. |
-| Pequeña | No del todo | Combina varios criterios de filtrado con selección manual en mapa, lo que la hace más grande que el resto de las historias. Podría dividirse por criterio si el equipo lo prefiere. |
+| Estimable | Parcial | El objetivo de selección y orden ya está definido (RF-47, RF-48, RF-49), pero la heurística o servicio externo concreto que lo implementa puede requerir un análisis técnico previo antes de poder estimarse con precisión. |
+| Pequeña | No del todo | Combina varios criterios de filtrado, modo de desplazamiento y selección manual en mapa, lo que la hace más grande que el resto de las historias. Podría dividirse por criterio si el equipo lo prefiere. |
 | Verificable | Sí | Se comprueba con el criterio 2: al generar una segunda ruta después de que una solicitud ya quedó reservada en la primera, esa solicitud no debe aparecer en el resultado de la segunda, verificable comparando ambos listados. |
 
 ---

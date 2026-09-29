@@ -111,6 +111,15 @@ note right of dictamen
   que se define justo antes de firmar. Ver Decisión 6.
 end note
 
+note right of ruta
+  <b>modo_desplazamiento</b> (Caminando/Vehículo) lo elige
+  el ingeniero al generar la ruta (RF-49). Junto con
+  antigüedad y eficiencia del recorrido, define qué
+  solicitudes se seleccionan (RF-47) y en qué orden se
+  visitan (RF-48), partiendo de la sede de la Dirección
+  General de Parques y Paseos. Ver Decisión 7.
+end note
+
 entity "Fotografia" as foto {
   * id_foto : PK
   --
@@ -141,6 +150,7 @@ entity "Ruta" as ruta {
   fecha
   tipo
   estado
+  modo_desplazamiento
 }
 
 entity "RutaSolicitud" as ruta_solicitud {

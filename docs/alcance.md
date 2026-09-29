@@ -101,6 +101,21 @@ seguimiento para la Dirección.
   - Cantidad o porcentaje de casos por **distrito** (opcional: puede no filtrar por distrito).
   - Cantidad de casos por **nivel de prioridad**.
   - Selección manual de una **zona en el mapa**.
+  - **Modo de desplazamiento**: a pie o en vehículo. El ingeniero lo elige al generar la
+    ruta, ya que la mayoría de las veces se desplaza caminando, pero en ciertos casos usa un
+    vehículo de la Dirección; el sistema calcula tiempo y distancia según el modo elegido.
+- **Criterio de selección cuando hay más solicitudes candidatas que cupo:** cuando las
+  solicitudes que cumplen los criterios anteriores superan la cantidad pedida por el
+  ingeniero, el sistema selecciona cuáles incluir combinando dos factores: **antigüedad**
+  de la solicitud (preferencia a las más antiguas) y **eficiencia del recorrido
+  resultante** (menor tiempo y distancia total según el modo de desplazamiento elegido).
+- **Criterio de orden de visita:** una vez seleccionadas las solicitudes, el sistema ordena
+  su visita minimizando el tiempo y la distancia total del recorrido. El punto de partida
+  del cálculo es la sede de la **Dirección General de Parques y Paseos**, usada también
+  como referencia de cierre del circuito al calcular el recorrido óptimo — esto es un
+  objetivo de cálculo, no una obligación operativa: los ingenieros agrónomos no están
+  obligados a marcar el regreso a la sede al final de la jornada. El cálculo de consumo de
+  combustible **queda fuera de alcance**.
 - Un botón **"Restablecer"** descarta la ruta completa y permite generar una nueva. Los
   casos que quedaron sin dictaminar en la ruta descartada vuelven a estar disponibles como
   pendientes para una nueva ruta.
