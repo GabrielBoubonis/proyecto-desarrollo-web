@@ -23,92 +23,98 @@ _Visualizar en [plantuml.com](https://www.plantuml.com/plantuml/uml/)._
 
 ### Usuario
 
-- `nombre_usuario` (PK): identificador único del usuario. Formato: inicial del nombre + 6
-  letras del apellido + número incremental si se repite (definido en Alcance/Requisitos,
-  no es un dato que el usuario elija).
-- `contraseña_hash`: hash de la contraseña propia del sistema (nunca se guarda en texto
-  plano; tampoco se guarda ninguna contraseña de la Autenticación Institucional).
-- `rol`: uno de Lector, Operador, Jefe, Administrador. Ver Decisión 1 sobre por qué es un
-  atributo y no una entidad aparte.
-- `activo`: booleano. Permite dar de baja el acceso sin borrar el historial de dictámenes
+- `nombre_usuario` (PK, `string`): identificador único del usuario. Formato: inicial del
+  nombre + 6 letras del apellido + número incremental si se repite (definido en
+  Alcance/Requisitos, no es un dato que el usuario elija).
+- `contraseña_hash` (`string`): hash de la contraseña propia del sistema (nunca se guarda en
+  texto plano; tampoco se guarda ninguna contraseña de la Autenticación Institucional).
+- `rol` (`string`): uno de Lector, Operador, Jefe, Administrador. Ver Decisión 1 sobre por
+  qué es un atributo y no una entidad aparte.
+- `activo` (`boolean`): permite dar de baja el acceso sin borrar el historial de dictámenes
   que ese usuario firmó (no se puede eliminar un Usuario que ya firmó algo).
-- `fecha_alta`: cuándo el CIL creó la cuenta.
+- `fecha_alta` (`date`): cuándo el CIL creó la cuenta.
 
 ### Solicitud
 
-- `numero_sua` (PK, compuesta con `anio`): número que asigna el SUA al reclamo.
-- `anio` (PK, compuesta con `numero_sua`): año de creación **original** de la solicitud en
-  el SUA. No cambia aunque el caso se re-derive años después (ver Alcance, sección 2.4).
-- `distrito`, `prioridad`: usados para el armado de rutas (RF-15). `prioridad` es la
-  prioridad de **triage** al momento de crear el reclamo — no confundir con
-  `Dictamen.nivel_prioridad`, que es la urgencia de ejecución que define el ingeniero
+- `numero_sua` (PK, compuesta con `anio`, `string`): número que asigna el SUA al reclamo.
+- `anio` (PK, compuesta con `numero_sua`, `int`): año de creación **original** de la
+  solicitud en el SUA. No cambia aunque el caso se re-derive años después (ver Alcance,
+  sección 2.4).
+- `distrito` (`string`), `prioridad` (`string`): usados para el armado de rutas (RF-15).
+  `prioridad` es la prioridad de **triage** al momento de crear el reclamo — no confundir
+  con `Dictamen.nivel_prioridad`, que es la urgencia de ejecución que define el ingeniero
   después de dictaminar (ver Decisión 6).
-- `direccion`: domicilio de la solicitud tal como lo reporta el SUA (puede no coincidir con
-  la ubicación exacta del ejemplar; ver `domicilio_ejemplar` en Dictamen).
-- `descripcion_reclamo`: texto técnico del problema reportado, sin datos personales del
-  vecino (RF-29).
-- `estado`: Pendiente, Dictaminada o Pendiente-revisión.
-- `es_tormenta`: booleano que determina si la solicitud aparece en el listado general o
+- `direccion` (`string`): domicilio de la solicitud tal como lo reporta el SUA (puede no
+  coincidir con la ubicación exacta del ejemplar; ver `domicilio_ejemplar` en Dictamen).
+- `descripcion_reclamo` (`string`): texto técnico del problema reportado, sin datos
+  personales del vecino (RF-29).
+- `estado` (`string`): Pendiente, Dictaminada o Pendiente-revisión.
+- `es_tormenta` (`boolean`): determina si la solicitud aparece en el listado general o
   exclusivamente en el Protocolo por tormenta (RF-39).
-- `fecha_ultima_derivacion`: se usa para ordenar el Protocolo por tormenta por antigüedad
-  (RF-41) y para calcular el objetivo de 48 horas hábiles.
+- `fecha_ultima_derivacion` (`date`): se usa para ordenar el Protocolo por tormenta por
+  antigüedad (RF-41) y para calcular el objetivo de 48 horas hábiles.
 
 ### HistorialDerivacion
 
-- `id_derivacion` (PK): identificador propio del sistema (no viene del SUA).
-- `numero_sua`, `anio` (FK): a qué Solicitud pertenece este evento.
-- `fecha_derivacion`: cuándo ocurrió esa derivación puntual.
-- `motivo`: "Nueva" (primera vez) o "Re-derivación por vencimiento". Este registro es lo
-  que le permite al Dashboard contar cada derivación como un evento independiente
-  (RF-37), aunque corresponda a la misma Solicitud.
+- `id_derivacion` (PK, `int`): identificador propio del sistema (no viene del SUA).
+- `numero_sua` (FK, `string`), `anio` (FK, `int`): a qué Solicitud pertenece este evento.
+- `fecha_derivacion` (`date`): cuándo ocurrió esa derivación puntual.
+- `motivo` (`string`): "Nueva" (primera vez) o "Re-derivación por vencimiento". Este
+  registro es lo que le permite al Dashboard contar cada derivación como un evento
+  independiente (RF-37), aunque corresponda a la misma Solicitud.
 
 ### Dictamen
 
-- `id_dictamen` (PK): identificador propio, ya que puede haber más de un dictamen por
+- `id_dictamen` (PK, `int`): identificador propio, ya que puede haber más de un dictamen por
   Solicitud a lo largo del tiempo (historial, RF-27).
-- `numero_sua`, `anio` (FK): a qué Solicitud pertenece.
-- `nombre_usuario` (FK): quién lo firmó.
-- `nota_numero`, `expediente_numero`: datos del trámite administrativo municipal.
-  **Opcionales** (no todo dictamen tiene expediente asociado al momento de firmarse).
-- `fecha_emision`: se guarda junto con el hash como parte de la firma digital (RF-22).
-- `domicilio_ejemplar`: dirección real donde está el árbol, determinada por el ingeniero en
-  el lugar. **Obligatorio.** Se guarda acá y no solo en Solicitud — ver Decisión 3.
-- `calle_esquina`, `numero_esquina`, `referencia_ubicacion`, `distancia_medianera_referencia`:
-  datos de ubicación complementarios. **Opcionales**, se completan solo cuando el domicilio
-  no tiene numeración exacta.
-- `especie`: especie del ejemplar. **Obligatorio.**
-- `cantidad_frente`: cantidad de ejemplares sobre el frente del domicilio. **Obligatorio**
-  (con valor por defecto 1).
-- `nivel_dano_vereda`: Alto/Medio/Bajo. **Opcional** (no todos los casos tienen daño en
-  vereda).
-- `es_extraccion` (booleano), `perimetro_tronco`, `motivo_extraccion`: datos del Bloque 2.
-  `perimetro_tronco` y `motivo_extraccion` son **obligatorios solo si** `es_extraccion` es
-  verdadero.
-- `es_sin_trabajo` (booleano), `motivo_sin_trabajo`: datos del Bloque 5. `motivo_sin_trabajo`
-  es **obligatorio solo si** `es_sin_trabajo` es verdadero.
-- `complejidad`: Baja/Media/Alta/Máxima. **Obligatorio.** Es la complejidad de la
+- `numero_sua` (FK, `string`), `anio` (FK, `int`): a qué Solicitud pertenece.
+- `nombre_usuario` (FK, `string`): quién lo firmó.
+- `nota_numero` (`string`), `expediente_numero` (`string`): datos del trámite administrativo
+  municipal. **Opcionales** (no todo dictamen tiene expediente asociado al momento de
+  firmarse).
+- `fecha_emision` (`date`): se guarda junto con el hash como parte de la firma digital
+  (RF-22).
+- `domicilio_ejemplar` (`string`): dirección real donde está el árbol, determinada por el
+  ingeniero en el lugar. **Obligatorio.** Se guarda acá y no solo en Solicitud — ver
+  Decisión 3.
+- `calle_esquina` (`string`), `numero_esquina` (`string`), `referencia_ubicacion`
+  (`string`), `distancia_medianera_referencia` (`decimal`): datos de ubicación
+  complementarios. **Opcionales**, se completan solo cuando el domicilio no tiene
+  numeración exacta.
+- `especie` (`string`): especie del ejemplar. **Obligatorio.**
+- `cantidad_frente` (`int`): cantidad de ejemplares sobre el frente del domicilio.
+  **Obligatorio** (con valor por defecto 1).
+- `nivel_dano_vereda` (`string`): Alto/Medio/Bajo. **Opcional** (no todos los casos tienen
+  daño en vereda).
+- `es_extraccion` (`boolean`), `perimetro_tronco` (`decimal`), `motivo_extraccion`
+  (`string`): datos del Bloque 2. `perimetro_tronco` y `motivo_extraccion` son
+  **obligatorios solo si** `es_extraccion` es verdadero.
+- `es_sin_trabajo` (`boolean`), `motivo_sin_trabajo` (`string`): datos del Bloque 5.
+  `motivo_sin_trabajo` es **obligatorio solo si** `es_sin_trabajo` es verdadero.
+- `complejidad` (`string`): Baja/Media/Alta/Máxima. **Obligatorio.** Es la complejidad de la
   **intervención a realizar sobre el ejemplar**, un dato propio del dictamen. No debe
   confundirse con ningún criterio de generación de rutas (RF-15): son dos conceptos
   independientes, uno se define al armar la ruta (antes de dictaminar) y el otro al
   completar el dictamen (durante o después de la visita).
-- `urgente`, `arbol_frente_garage`, `media_tension`, `de_oficio`: booleanos. **Opcionales**
-  por naturaleza (su ausencia equivale a "no", no bloquean la firma). `de_oficio` describe
-  que el reclamo se originó por iniciativa de la Dirección y no por un vecino — esto es
-  independiente de la funcionalidad de "alta de reclamo desde la calle" que se descartó del
-  alcance: acá el dictamen ya parte de una Solicitud existente derivada por el SUA, este
-  campo solo documenta el origen para el registro legal.
-- `plantar`: Cazuela / Construir cazuela / Vereda jardín / ninguna. **Opcional.**
-- `nivel_prioridad`: Alta/Media/Baja. **Obligatorio.** Es la urgencia con la que hay que
-  **ejecutar** la intervención ya dictaminada (por ejemplo, una poda de riesgo eléctrico
-  puede necesitar resolverse antes que una de mantenimiento estético), definida por el
-  ingeniero al cerrar el dictamen. No debe confundirse con `Solicitud.prioridad`, que es la
-  prioridad de **triage** asignada por quien recibe el reclamo y se usa para armar rutas
-  (RF-15) — son dos momentos y dos criterios distintos. Se ubica al final del formulario,
-  junto a `observaciones`, como el último dato que se completa antes de firmar. Ver
-  Decisión 6.
-- `observaciones`: texto libre. **Opcional.**
-- `hash_firma`, `estado_sincronizacion`: generados por el sistema al firmar, no los completa
-  el usuario (RF-22, RF-25).
+- `urgente` (`boolean`), `arbol_frente_garage` (`boolean`), `media_tension` (`boolean`),
+  `de_oficio` (`boolean`): **Opcionales** por naturaleza (su ausencia equivale a "no", no
+  bloquean la firma). `de_oficio` describe que el reclamo se originó por iniciativa de la
+  Dirección y no por un vecino — esto es independiente de la funcionalidad de "alta de
+  reclamo desde la calle" que se descartó del alcance: acá el dictamen ya parte de una
+  Solicitud existente derivada por el SUA, este campo solo documenta el origen para el
+  registro legal.
+- `plantar` (`string`): Cazuela / Construir cazuela / Vereda jardín / ninguna. **Opcional.**
+- `nivel_prioridad` (`string`): Alta/Media/Baja. **Obligatorio.** Es la urgencia con la que
+  hay que **ejecutar** la intervención ya dictaminada (por ejemplo, una poda de riesgo
+  eléctrico puede necesitar resolverse antes que una de mantenimiento estético), definida
+  por el ingeniero al cerrar el dictamen. No debe confundirse con `Solicitud.prioridad`, que
+  es la prioridad de **triage** asignada por quien recibe el reclamo y se usa para armar
+  rutas (RF-15) — son dos momentos y dos criterios distintos. Se ubica al final del
+  formulario, junto a `observaciones`, como el último dato que se completa antes de firmar.
+  Ver Decisión 6.
+- `observaciones` (`string`): texto libre. **Opcional.**
+- `hash_firma` (`string`), `estado_sincronizacion` (`string`): generados por el sistema al
+  firmar, no los completa el usuario (RF-22, RF-25).
 - **Obligatorio y bloqueante para firmar** (no es un atributo de Dictamen, es una regla de
   validación): debe existir al menos una Fotografia asociada (RF-45).
 - **Obligatorio y bloqueante para firmar** (regla de validación, no un atributo): si
@@ -117,48 +123,50 @@ _Visualizar en [plantuml.com](https://www.plantuml.com/plantuml/uml/)._
 
 ### Fotografia
 
-- `id_foto` (PK).
-- `id_dictamen` (FK): a qué dictamen pertenece.
-- `archivo_referencia`: referencia/ruta del archivo de imagen.
-- `orden`: para mostrarlas siempre en el mismo orden en el documento final.
+- `id_foto` (PK, `int`).
+- `id_dictamen` (FK, `int`): a qué dictamen pertenece.
+- `archivo_referencia` (`string`): referencia/ruta del archivo de imagen.
+- `orden` (`int`): para mostrarlas siempre en el mismo orden en el documento final.
 
 ### TrabajoAereo
 
-- `id_trabajo_aereo` (PK).
-- `id_dictamen` (FK).
-- `tipo_trabajo`: uno de los 12 ítems del catálogo del Bloque 4 (poda de formación,
-  liberación de conductores eléctricos, etc.). Cada fila representa **un** ítem marcado;
-  un Dictamen puede tener varias filas (selección múltiple confirmada). **No puede tener
-  filas si el Dictamen tiene `es_extraccion = true`** (ver Decisión 5).
+- `id_trabajo_aereo` (PK, `int`).
+- `id_dictamen` (FK, `int`).
+- `tipo_trabajo` (`string`): uno de los 12 ítems del catálogo del Bloque 4 (poda de
+  formación, liberación de conductores eléctricos, etc.). Cada fila representa **un** ítem
+  marcado; un Dictamen puede tener varias filas (selección múltiple confirmada). **No puede
+  tener filas si el Dictamen tiene `es_extraccion = true`** (ver Decisión 5).
 
 ### TrabajoSubterraneo
 
-- `id_trabajo_subterraneo` (PK).
-- `id_dictamen` (FK).
-- `tipo_trabajo`: Corte vertical de raíces / Corte horizontal de raíces / Agrandamiento de
-  cazuela.
-- `distancia_borde`: **obligatorio solo si** `tipo_trabajo` es "Corte vertical de raíces"
-  (es el único de los tres que registra una distancia en el formulario original).
-  **No puede tener filas si el Dictamen tiene `es_extraccion = true`** (ver Decisión 5).
+- `id_trabajo_subterraneo` (PK, `int`).
+- `id_dictamen` (FK, `int`).
+- `tipo_trabajo` (`string`): Corte vertical de raíces / Corte horizontal de raíces /
+  Agrandamiento de cazuela.
+- `distancia_borde` (`decimal`): **obligatorio solo si** `tipo_trabajo` es "Corte vertical
+  de raíces" (es el único de los tres que registra una distancia en el formulario
+  original). **No puede tener filas si el Dictamen tiene `es_extraccion = true`** (ver
+  Decisión 5).
 
 ### Ruta
 
-- `id_ruta` (PK).
-- `nombre_usuario` (FK): quién la generó.
-- `fecha`: día de la jornada a la que corresponde.
-- `tipo`: Normal o Tormenta.
-- `estado`: Activa / Restablecida.
-- `modo_desplazamiento`: Caminando / Vehículo. Lo elige el ingeniero al generar la ruta
-  (RF-49) y determina cómo se calculan el tiempo y la distancia del recorrido para
+- `id_ruta` (PK, `int`).
+- `nombre_usuario` (FK, `string`): quién la generó.
+- `fecha` (`date`): día de la jornada a la que corresponde.
+- `tipo` (`string`): Normal o Tormenta.
+- `estado` (`string`): Activa / Restablecida.
+- `modo_desplazamiento` (`string`): Caminando / Vehículo. Lo elige el ingeniero al generar
+  la ruta (RF-49) y determina cómo se calculan el tiempo y la distancia del recorrido para
   seleccionar y ordenar las solicitudes (RF-47, RF-48). Ver Decisión 7.
 
 ### RutaSolicitud
 
-- `id_ruta` (PK, FK): la ruta.
-- `numero_sua`, `anio` (PK, FK): la solicitud incluida.
-- `fecha_incorporacion`: cuándo se agregó esa solicitud a la ruta.
-- `liberada` (booleano), `fecha_liberacion`: si la solicitud dejó de estar reservada (por
-  dictaminarse, por "Restablecer" o por el corte automático de las 18:00 hs) y cuándo.
+- `id_ruta` (PK, FK, `int`): la ruta.
+- `numero_sua` (PK, FK, `string`), `anio` (PK, FK, `int`): la solicitud incluida.
+- `fecha_incorporacion` (`datetime`): cuándo se agregó esa solicitud a la ruta.
+- `liberada` (`boolean`), `fecha_liberacion` (`datetime`): si la solicitud dejó de estar
+  reservada (por dictaminarse, por "Restablecer" o por el corte automático de las 18:00 hs)
+  y cuándo.
 
 ## Decisiones de diseño
 
