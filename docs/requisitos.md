@@ -25,6 +25,7 @@ poder trabajar sin conexión en el campo.
 | RF-06 | El sistema debe permitir a un usuario con rol Administrador crear, modificar y dar de baja usuarios, y asignarles un rol (Administrador, Jefe, Operador o Lector). |
 | RF-07 | El sistema debe exigir que la contraseña local cumpla: mínimo 8 caracteres, al menos una mayúscula, una minúscula, un número y un carácter especial. |
 | RF-08 | El sistema debe permitir que un Administrador restablezca (blanquee) la contraseña de un usuario. |
+| RF-50 | Ante cualquier fallo de inicio de sesión (usuario inexistente, contraseña incorrecta o usuario no vigente en la Autenticación Institucional), el sistema debe mostrar un único mensaje de error genérico, sin indicar cuál de los tres motivos lo ocasionó. |
 
 ### Módulo 2 — Lectura de solicitudes del SUA
 
@@ -66,6 +67,7 @@ poder trabajar sin conexión en el campo.
 | RF-29 | El sistema debe limitar los datos del vecino visibles a lo estrictamente necesario para el trabajo técnico (ubicación y descripción del reclamo), excluyendo nombre y datos de contacto. |
 | RF-45 | El sistema debe exigir al menos una fotografía del ejemplar adjunta a cada dictamen, y no debe permitir firmarlo si no hay ninguna cargada. |
 | RF-46 | Si el ingeniero marca "Extracción" en el dictamen, el sistema debe deshabilitar la selección de trabajos en la parte aérea y en la parte subterránea para ese mismo dictamen, y debe rechazar el envío si de todos modos llegaran cargados. |
+| RF-51 | Al confirmar la firma de un dictamen (paso 3 de CU-06), el sistema debe exigir un segundo factor de autenticación (código enviado a la cuenta institucional del usuario, o verificación biométrica propia del dispositivo) además de la sesión ya iniciada, dado el valor legal del acto conforme a la Ordenanza N.° 5.118/91. |
 
 ### Módulo 5 — Trabajo sin conexión y sincronización
 
@@ -76,6 +78,8 @@ poder trabajar sin conexión en el campo.
 | RF-32 | El sistema debe guardar localmente en el dispositivo cualquier dictamen firmado sin conexión, en estado "pendiente de sincronizar". |
 | RF-33 | El sistema debe reintentar automáticamente el envío de los dictámenes pendientes de sincronizar en cuanto detecte conexión, sin intervención manual del usuario. |
 | RF-34 | El sistema debe mostrar al ingeniero un indicador permanente del estado de sincronización (todo sincronizado / cantidad de dictámenes pendientes / sin conexión). |
+| RF-52 | El sistema debe bloquear el acceso local a la aplicación en el captor luego de 5 intentos de inicio de sesión fallidos consecutivos, y debe permitir a un Administrador revocar de forma remota la sesión y los datos locales de un captor reportado como perdido o robado, en cuanto el dispositivo vuelva a tener conexión. |
+| RF-53 | Al sincronizar un dictamen firmado sin conexión (CU-10), el sistema debe recalcular el hash de firma sobre el contenido recibido y compararlo contra el hash generado al momento de la firma en el dispositivo; si no coinciden, debe rechazar la sincronización, conservar el dictamen marcado como "íntegridad no verificada" y notificar al Administrador. |
 
 ### Módulo 6 — Dashboard
 
@@ -97,6 +101,13 @@ poder trabajar sin conexión en el campo.
 | RF-42 | Una ruta de tormenta debe respetar las mismas reglas de exclusión y liberación que una ruta normal (RF-16, RF-17). |
 | RF-43 | El dictamen de una solicitud de tormenta debe completarse con el mismo formulario que cualquier otro dictamen (Módulo 4), sin campos adicionales. |
 
+### Módulo 8 — Auditoría
+
+| ID | Requisito |
+|----|-----------|
+| RF-54 | El sistema debe registrar, en un log de auditoría independiente e inmutable (sin edición ni borrado posterior desde la aplicación), toda alta, baja o modificación de rol de un usuario, y toda reconfiguración de los criterios de generación de rutas, indicando qué usuario la realizó, qué acción fue, y fecha y hora. |
+| RF-55 | El sistema debe permitir a un usuario con rol Administrador consultar el log de auditoría, filtrando por usuario, tipo de acción y rango de fechas. |
+
 ## Requisitos no funcionales
 
 ### Rendimiento y disponibilidad
@@ -108,6 +119,7 @@ poder trabajar sin conexión en el campo.
 | RNF-03 | El sistema debe soportar un volumen de al menos 140 dictámenes diarios (aprox. 20 por ingeniero) sin degradación del rendimiento. |
 | RNF-04 | En modo offline, cada solicitud HTTP debe tener un tiempo límite de espera corto (del orden de segundos) para no bloquear la interfaz ante señal intermitente. |
 | RNF-15 | El sistema debe soportar la resolución de hasta 100 solicitudes de tormenta dentro de un plazo de 48 horas hábiles, sin degradación del rendimiento. |
+| RNF-17 | Ante una caída específica del SUA (distinta de la falta de conexión general del dispositivo), el sistema debe reintentar automáticamente, con espera creciente entre intentos, la lectura de solicitudes (Módulo 2) y la sincronización de dictámenes (Módulo 5), sin bloquear las funcionalidades que no dependen del SUA (consulta de dictámenes ya cargados, rutas ya generadas). |
 
 ### Seguridad y usabilidad
 
@@ -118,6 +130,8 @@ poder trabajar sin conexión en el campo.
 | RNF-07 | El sistema debe usar HTTPS/TLS en todas las comunicaciones con el SUA, la Autenticación Institucional y entre cliente y servidor. |
 | RNF-08 | El sistema debe limitar los datos personales del vecino que consulta y almacena a los estrictamente necesarios para el trabajo técnico. |
 | RNF-09 | La interfaz debe ser utilizable en pantallas de celular (diseño responsive), dado que el ingeniero trabaja desde un captor en el campo. |
+| RNF-16 | Los dictámenes y fotografías almacenados localmente en el captor en estado "pendiente de sincronizar" deben guardarse cifrados en reposo (at-rest), de forma que no sean legibles si el dispositivo se pierde o es sustraído. |
+| RNF-18 | El sistema debe validar y sanear (tipo, longitud y caracteres permitidos) todo dato recibido del SUA antes de persistirlo, rechazando o marcando para revisión manual del Administrador cualquier registro que no cumpla el esquema esperado. |
 
 ### Almacenamiento y continuidad
 

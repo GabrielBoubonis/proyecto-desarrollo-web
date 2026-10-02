@@ -27,6 +27,7 @@ rectangle "Sistema de Dictaminación Técnica" {
   usecase "CU-10\nDictaminar sin conexión" as CU10
   usecase "CU-11\nConsultar dashboard" as CU11
   usecase "CU-12\nAtender protocolo\npor tormenta" as CU12
+  usecase "CU-13\nConsultar registro\nde auditoría" as CU13
 
 }
 
@@ -57,6 +58,7 @@ AD ..> CU12 : <<solo consulta>>
 LE ..> CU12 : <<solo consulta>>
 
 AD --> CU02
+AD --> CU13
 
 JF --> CU11
 AD --> CU11

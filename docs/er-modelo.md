@@ -18,6 +18,7 @@ _Visualizar en [plantuml.com](https://www.plantuml.com/plantuml/uml/)._
 | TrabajoSubterraneo | Un ítem seleccionado del catálogo de trabajos sobre raíces (Bloque 3 del formulario), de selección múltiple. | Pertenece a un Dictamen. |
 | Ruta | Conjunto de solicitudes que un ingeniero decide atender en una jornada (normal o de tormenta). | Generada por un Usuario; agrupa Solicitudes a través de RutaSolicitud. |
 | RutaSolicitud | Tabla intermedia que resuelve la relación N a M entre Ruta y Solicitud, con la fecha de reserva y si ya fue liberada. | Conecta una Ruta con una Solicitud. |
+| RegistroAuditoria | Un evento inmutable de auditoría: alta, baja o cambio de rol de un Usuario, o reconfiguración de los criterios de ruteo (RF-54). | Generado por un Usuario (quien ejecutó la acción). |
 
 ## Descripción de atributos principales
 
@@ -168,6 +169,21 @@ _Visualizar en [plantuml.com](https://www.plantuml.com/plantuml/uml/)._
   reservada (por dictaminarse, por "Restablecer" o por el corte automático de las 18:00 hs)
   y cuándo.
 
+### RegistroAuditoria
+
+- `id_auditoria` (PK, `int`): identificador propio del evento.
+- `nombre_usuario` (FK, `string`): usuario que ejecutó la acción auditada (quien hizo el
+  alta, la baja, el cambio de rol o la reconfiguración de criterios de ruteo).
+- `accion` (`string`): tipo de evento, por ejemplo "Alta de usuario", "Baja de usuario",
+  "Cambio de rol", "Reconfiguración de criterios de ruteo".
+- `entidad_afectada` (`string`): sobre qué registro se aplicó la acción (por ejemplo, el
+  `nombre_usuario` del usuario dado de alta/baja o modificado).
+- `valor_anterior` (`string`): estado previo del dato modificado, cuando aplica (por
+  ejemplo, el rol anterior). **Opcional**: no aplica a un alta.
+- `valor_nuevo` (`string`): estado posterior del dato modificado. **Opcional** en una baja.
+- `fecha_hora` (`datetime`): momento exacto del evento, usado para ordenar el listado de
+  CU-13 (más recientes primero) y para los filtros por rango de fechas.
+
 ## Decisiones de diseño
 
 ### Decisión 1 — Rol como atributo de Usuario, no como entidad aparte
@@ -299,3 +315,27 @@ visita entre las seleccionadas. Se resolvió de la siguiente manera:
   técnica de implementación — ver RNF-14 y la validación INVEST de HU-04 en
   `historias_usuario.md`, donde se deja explícito que esto puede requerir un análisis
   técnico previo.
+
+### Decisión 8 — Registro de auditoría inmutable, independiente del historial de negocio
+
+Para resolver R-02/R-03 de la matriz de riesgos (acciones administrativas sin trazabilidad:
+altas, bajas y cambios de rol de usuarios, y reconfiguración de los criterios de ruteo
+hechas sin dejar rastro verificable de quién y cuándo), se evaluaron dos formas de guardar
+este historial:
+
+- **Extender las entidades existentes** (por ejemplo, agregar columnas
+  `modificado_por`/`fecha_modificacion` a `Usuario`). Se descartó porque solo captura el
+  **último** cambio, no la secuencia completa de eventos que pide RF-54, y porque mezclar un
+  campo de auditoría dentro de una entidad de negocio facilita que se sobrescriba por error
+  junto con el resto del registro.
+- **Una entidad propia, de solo inserción** (la elegida): `RegistroAuditoria` guarda una
+  fila por evento, nunca se actualiza ni se borra una vez creada (append-only), y esa regla
+  se aplica a nivel de la aplicación: ningún flujo del sistema expone una operación de
+  `UPDATE` o `DELETE` sobre esta entidad, solo `INSERT` (uno por cada acción administrativa
+  relevante) y `SELECT` (para CU-13). Modelarlo como entidad separada, en vez de extender
+  `Usuario`, evita que una alteración directa sobre la base de datos pueda "limpiar" el
+  propio registro de auditoría sin dejar un evento adicional que lo documente.
+
+Esta decisión está directamente ligada a RF-54 (registro inmutable), RF-55 (consulta con
+filtros) en `requisitos.md`, a HU-13 en `historias_usuario.md` y a CU-13 en
+`casos_de_uso.md`.

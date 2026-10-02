@@ -31,6 +31,8 @@ _Visualizar en [plantuml.com](https://www.plantuml.com/plantuml/uml/)._
 | `<<extend>>` | CU-09 extiende CU-06 | Solo se consulta el dictamen anterior si la solicitud está en estado Pendiente-revisión. |
 | `<<extend>>` | CU-10 extiende CU-06 | Solo aplica si el dispositivo no tiene conexión al momento de firmar. |
 
+CU-13 no participa de relaciones `<<include>>`/`<<extend>>`: es un caso de uso independiente, accesible únicamente para el Administrador.
+
 ---
 
 ## CU-01 — Iniciar sesión
@@ -49,8 +51,8 @@ _Visualizar en [plantuml.com](https://www.plantuml.com/plantuml/uml/)._
 | # | Acción (actor) | Reacción (sistema) |
 |---|----------------|--------------------|
 | 1 | El usuario accede a la pantalla de ingreso. | El sistema muestra el formulario de usuario y contraseña. |
-| 2 | El usuario ingresa sus credenciales y confirma. | El sistema verifica que las credenciales correspondan a un usuario registrado.<br>• 2.1 Si las credenciales no son válidas, el sistema deberá denegar el acceso y mostrar un mensaje de error genérico. |
-| 3 | — | El sistema consulta a la Autenticación Institucional que el usuario siga vigente en la institución.<br>• 3.1 Si el usuario no está vigente, el sistema deberá denegar el acceso. |
+| 2 | El usuario ingresa sus credenciales y confirma. | El sistema verifica que las credenciales correspondan a un usuario registrado.<br>• 2.1 Si las credenciales no son válidas, el sistema deberá denegar el acceso y mostrar un mensaje de error genérico (RF-50), sin indicar si el usuario existe o no. |
+| 3 | — | El sistema consulta a la Autenticación Institucional que el usuario siga vigente en la institución.<br>• 3.1 Si el usuario no está vigente, el sistema deberá denegar el acceso mostrando el mismo mensaje genérico del paso 2.1 (RF-50). |
 | 4 | — | El sistema habilita el acceso y muestra el menú correspondiente al rol del usuario. |
 
 ### Excepciones
@@ -78,7 +80,7 @@ _Visualizar en [plantuml.com](https://www.plantuml.com/plantuml/uml/)._
 | Descripción | El Administrador del CIL da de alta, modifica o da de baja usuarios del sistema y les asigna un rol, para controlar el acceso al sistema. |
 | Actores | Principal: Administrador / Secundario: — |
 | Precondiciones | El Administrador inició sesión (CU-01). |
-| Postcondiciones | Éxito: el usuario queda creado, modificado o dado de baja, con su rol asignado. / Fallo: no se altera el padrón de usuarios existente. |
+| Postcondiciones | Éxito: el usuario queda creado, modificado o dado de baja, con su rol asignado, y la acción queda registrada en el log de auditoría (CU-13). / Fallo: no se altera el padrón de usuarios existente. |
 
 ### Secuencia normal
 
@@ -87,7 +89,7 @@ _Visualizar en [plantuml.com](https://www.plantuml.com/plantuml/uml/)._
 | 1 | El Administrador accede al apartado de gestión de usuarios. | El sistema muestra el listado de usuarios existentes con su rol. |
 | 2 | El Administrador elige crear un usuario nuevo. | El sistema muestra el formulario de alta. |
 | 3 | El Administrador completa los datos, define una contraseña y selecciona un rol. | El sistema verifica que la contraseña cumpla las reglas de complejidad.<br>• 3.1 Si la contraseña no cumple los requisitos, el sistema deberá rechazar el alta e indicar qué requisito falta. |
-| 4 | El Administrador confirma el alta. | El sistema registra el usuario con el rol asignado y lo muestra en el listado. |
+| 4 | El Administrador confirma el alta. | El sistema registra el usuario con el rol asignado y lo muestra en el listado.<br>• 4.1 El sistema deberá registrar la acción en el log de auditoría (usuario que la realizó, acción, fecha y hora), de forma inmutable (RF-54). |
 
 ### Excepciones
 
@@ -96,6 +98,7 @@ _Visualizar en [plantuml.com](https://www.plantuml.com/plantuml/uml/)._
 | E1 | El nombre de usuario generado ya existe. | El sistema agrega un número incremental al identificador para diferenciarlo. |
 | E2 | Un usuario perdió su contraseña y el Administrador la restablece. | El sistema genera una nueva contraseña y deja sin efecto la anterior. |
 | E3 | Se da de baja un usuario con sesión activa. | El sistema le impide continuar operando y le niega el siguiente ingreso. |
+| E4 | El Administrador reporta un captor como perdido o robado. | El sistema revoca de forma remota la sesión y los datos locales de ese dispositivo en cuanto vuelve a tener conexión, y registra la acción en el log de auditoría (RF-52, RF-54). |
 
 | Campo | Detalle |
 |-------|---------|
@@ -231,9 +234,10 @@ _Visualizar en [plantuml.com](https://www.plantuml.com/plantuml/uml/)._
 |---|----------------|--------------------|
 | 1 | El usuario selecciona una solicitud de su ruta. | El sistema muestra el formulario de dictamen en blanco, junto al detalle técnico del caso.<br>• 1.1 Si la solicitud está en estado Pendiente-revisión, el sistema deberá ofrecer consultar el dictamen anterior (CU-09). |
 | 2 | El usuario registra las características del ejemplar y la intervención que corresponde. | El sistema valida que los datos obligatorios estén completos.<br>• 2.1 Si faltan datos obligatorios, el sistema deberá señalar los campos incompletos y no permitir el envío.<br>• 2.2 Si el usuario marca "Extracción", el sistema deberá deshabilitar los campos de trabajos en la parte aérea y en la parte subterránea, por ser incongruentes con la extracción del ejemplar.<br>• 2.3 Si no se adjuntó al menos una fotografía del ejemplar, el sistema deberá impedir el envío y señalar que la fotografía es obligatoria. |
-| 3 | El usuario confirma el envío del dictamen. | El sistema verifica que la solicitud no haya sido dictaminada por otro ingeniero mientras tanto.<br>• 3.1 Si ya existe un dictamen activo para ese ejemplar, el sistema deberá rechazar el envío e informar que el caso ya fue resuelto. |
-| 4 | — | El sistema firma el dictamen dejando registro de quién lo emitió y cuándo, y lo almacena. |
-| 5 | — | El sistema envía los datos del dictamen al SUA (CU-07) y actualiza el estado de la solicitud a Dictaminada. |
+| 3 | El usuario confirma el envío del dictamen. | El sistema verifica que la solicitud no haya sido dictaminada por otro ingeniero mientras tanto.<br>• 3.1 Si ya existe un dictamen activo para ese ejemplar, el sistema deberá rechazar el envío e informar que el caso ya fue resuelto.<br>• 3.2 El sistema deberá exigir un segundo factor de autenticación (código a la cuenta institucional o verificación biométrica del dispositivo) antes de continuar (RF-51). |
+| 4 | El usuario completa el segundo factor de autenticación. | El sistema verifica el segundo factor.<br>• 4.1 Si el segundo factor es incorrecto o no se completa, el sistema deberá cancelar la firma sin almacenar el dictamen. |
+| 5 | — | El sistema firma el dictamen dejando registro de quién lo emitió y cuándo, y lo almacena. |
+| 6 | — | El sistema envía los datos del dictamen al SUA (CU-07) y actualiza el estado de la solicitud a Dictaminada. |
 
 ### Excepciones
 
@@ -268,16 +272,18 @@ _Visualizar en [plantuml.com](https://www.plantuml.com/plantuml/uml/)._
 | # | Acción (actor) | Reacción (sistema) |
 |---|----------------|--------------------|
 | 1 | — | El sistema detecta un dictamen firmado pendiente de enviar y verifica que haya conexión disponible. |
-| 2 | — | El sistema envía al SUA los datos complementarios correspondientes a esa solicitud. |
-| 3 | — | El sistema recibe la confirmación del SUA y marca el dictamen como sincronizado.<br>• 3.1 Si el envío no se confirma, el sistema deberá mantener el dictamen en estado pendiente de sincronizar y programar un nuevo intento. |
-| 4 | — | El sistema actualiza el indicador de sincronización visible para el usuario. |
+| 2 | — | El sistema recalcula el hash de firma sobre el contenido del dictamen y lo compara contra el hash generado en el dispositivo al momento de firmar.<br>• 2.1 Si los hashes no coinciden, el sistema deberá rechazar la sincronización, marcar el dictamen como "integridad no verificada" y notificar al Administrador (RF-53), sin continuar con el paso 3. |
+| 3 | — | El sistema envía al SUA los datos complementarios correspondientes a esa solicitud. |
+| 4 | — | El sistema recibe la confirmación del SUA y marca el dictamen como sincronizado.<br>• 4.1 Si el envío no se confirma, el sistema deberá mantener el dictamen en estado pendiente de sincronizar y programar un nuevo intento. |
+| 5 | — | El sistema actualiza el indicador de sincronización visible para el usuario. |
 
 ### Excepciones
 
 | # | Situación | Respuesta del sistema |
 |---|-----------|-----------------------|
-| E1 | El SUA está caído o no responde. | El sistema conserva el dictamen firmado y reintenta automáticamente más adelante, sin intervención del usuario. |
+| E1 | El SUA está caído o no responde. | El sistema distingue esta situación de la falta de conexión general del dispositivo, conserva el dictamen firmado y reintenta automáticamente con espera creciente entre intentos, sin intervención del usuario (RNF-17). |
 | E2 | El dispositivo no recupera conexión durante toda la jornada. | El sistema mantiene los dictámenes en cola y los envía apenas haya conexión, incluso en jornadas posteriores. |
+| E3 | El hash recalculado en el paso 2 no coincide con el generado al firmar. | El sistema rechaza la sincronización, conserva el dictamen marcado como "integridad no verificada" y notifica al Administrador, en lugar de darlo por sincronizado. |
 
 | Campo | Detalle |
 |-------|---------|
@@ -465,3 +471,36 @@ _Visualizar en [plantuml.com](https://www.plantuml.com/plantuml/uml/)._
 | Frecuencia | Excepcional: solo ante eventos climáticos, con picos concentrados de solicitudes. |
 | Importancia | Vital |
 | Urgencia | Inmediatamente |
+
+---
+
+## CU-13 — Consultar registro de auditoría
+
+| Campo | Detalle |
+|-------|---------|
+| Identificador | CU-13 |
+| Nombre | Consultar registro de auditoría |
+| Descripción | El Administrador consulta el log de auditoría de altas, bajas y cambios de rol de usuarios, y de reconfiguraciones de los criterios de ruteo, para revisar quién hizo qué cambio y cuándo. |
+| Actores | Principal: Administrador / Secundario: — |
+| Precondiciones | El Administrador inició sesión (CU-01). |
+| Postcondiciones | Éxito: el Administrador visualiza los eventos de auditoría según los filtros aplicados. / Fallo: no se muestra el listado y el Administrador es informado del motivo. |
+
+### Secuencia normal
+
+| # | Acción (actor) | Reacción (sistema) |
+|---|----------------|--------------------|
+| 1 | El Administrador accede al apartado de auditoría. | El sistema muestra el listado de eventos registrados (usuario, acción, fecha y hora), más recientes primero. |
+| 2 | El Administrador aplica un filtro por usuario, tipo de acción o rango de fechas. | El sistema actualiza el listado según el filtro aplicado. |
+
+### Excepciones
+
+| # | Situación | Respuesta del sistema |
+|---|-----------|-----------------------|
+| E1 | No hay eventos que cumplan el filtro aplicado. | El sistema muestra el listado vacío, indicando que no hay resultados para ese filtro. |
+
+| Campo | Detalle |
+|-------|---------|
+| Rendimiento | El sistema deberá mostrar el listado del paso 1 sin demora perceptible, aun con un historial extenso de eventos. |
+| Frecuencia | Baja: solo ante una revisión puntual o un incidente a investigar. |
+| Importancia | Importante |
+| Urgencia | Puede esperar |

@@ -10,13 +10,13 @@ _Cada historia debe incluir formato clásico, criterios de aceptación y validac
 |-------|---------|
 | Historia | Como usuario del sistema, quiero iniciar sesión con mi usuario y contraseña, para acceder a las solicitudes y funciones habilitadas para mi rol. |
 | Módulo | Autenticación y gestión de usuarios |
-| Requisitos relacionados | RF-01, RF-02, RF-03, RF-04 |
+| Requisitos relacionados | RF-01, RF-02, RF-03, RF-04, RF-50 |
 
 ### Criterios de aceptación
 
 1. Dado que ingreso un usuario y contraseña válidos y registrados localmente, cuando envío el formulario de login, el sistema valida contra la Autenticación Institucional y me otorga acceso con un token JWT.
 2. Dado que ingreso una contraseña incorrecta, cuando envío el formulario, el sistema rechaza el acceso y muestra un mensaje de error genérico, sin indicar si el usuario existe o no.
-3. Dado que mi usuario no existe en la base local del sistema, cuando intento iniciar sesión, el sistema rechaza el acceso aunque mis credenciales sean válidas en la Autenticación Institucional.
+3. Dado que mi usuario no existe en la base local del sistema, cuando intento iniciar sesión, el sistema rechaza el acceso aunque mis credenciales sean válidas en la Autenticación Institucional, mostrando el mismo mensaje genérico del criterio 2 (RF-50), sin distinguir el motivo del rechazo.
 4. Dado que inicié sesión correctamente, cuando pasan 30 minutos sin que interactúe con el sistema, mi sesión se cierra automáticamente.
 
 ### Validación INVEST
@@ -38,7 +38,7 @@ _Cada historia debe incluir formato clásico, criterios de aceptación y validac
 |-------|---------|
 | Historia | Como Administrador, quiero crear, modificar y dar de baja usuarios del sistema y asignarles un rol, para controlar quién puede acceder y qué puede hacer cada persona. |
 | Módulo | Autenticación y gestión de usuarios |
-| Requisitos relacionados | RF-06, RF-07, RF-08 |
+| Requisitos relacionados | RF-06, RF-07, RF-08, RF-54 |
 
 ### Criterios de aceptación
 
@@ -46,6 +46,7 @@ _Cada historia debe incluir formato clásico, criterios de aceptación y validac
 2. Dado que intento crear un usuario con una contraseña que no cumple los requisitos de complejidad, el sistema rechaza la creación e indica qué requisito falta.
 3. Dado que un usuario existente perdió su contraseña, cuando la restablezco desde mi panel de Administrador, el sistema genera una nueva contraseña y desactiva la anterior.
 4. Dado que doy de baja un usuario, cuando esa persona intenta iniciar sesión, el sistema le niega el acceso.
+5. Toda alta, baja o cambio de rol que realizo queda registrada en el log de auditoría (quién la hizo, qué acción fue, y cuándo), sin que yo ni ningún otro usuario pueda editarla o borrarla desde la aplicación.
 
 ### Validación INVEST
 
@@ -55,7 +56,7 @@ _Cada historia debe incluir formato clásico, criterios de aceptación y validac
 | Negociable | Sí | La forma de generar la contraseña temporal al restablecer (criterio 3) puede negociarse (aleatoria o definida por el Administrador) sin cambiar el valor de la historia: que el usuario recupere el acceso. |
 | Valiosa | Sí | Se verifica con el criterio 4: sin esta alta, no hay forma de que un nuevo ingeniero o Jefe obtenga acceso al sistema, dejando el trabajo operativo bloqueado. |
 | Estimable | Sí | El equipo puede estimarla porque las reglas de complejidad de contraseña ya están definidas sin ambigüedad en RNF-05. |
-| Pequeña | Sí | Se acota a alta, edición de rol y restablecimiento de contraseña de un usuario por vez (criterios 1 a 4); no incluye importación masiva ni auditoría de cambios. |
+| Pequeña | Sí | Se acota a alta, edición de rol y restablecimiento de contraseña de un usuario por vez (criterios 1 a 4), más el registro automático de esa acción en auditoría (criterio 5, que no agrega una pantalla propia); no incluye importación masiva. |
 | Verificable | Sí | Se comprueba con el criterio 2: al intentar crear un usuario con una contraseña que viole alguna regla de RNF-05, el sistema debe rechazar el alta e indicar el requisito faltante, verificable probando una contraseña que incumpla cada regla por separado. |
 
 ---
@@ -150,11 +151,11 @@ _Cada historia debe incluir formato clásico, criterios de aceptación y validac
 |-------|---------|
 | Historia | Como Operador, quiero completar y firmar digitalmente el dictamen técnico de una solicitud, para dejar registrada la intervención que corresponde sobre el ejemplar. |
 | Módulo | Dictaminación |
-| Requisitos relacionados | RF-20, RF-21, RF-22, RF-23, RF-24, RF-29, RF-45, RF-46 |
+| Requisitos relacionados | RF-20, RF-21, RF-22, RF-23, RF-24, RF-29, RF-45, RF-46, RF-51 |
 
 ### Criterios de aceptación
 
-1. Dado que abro una solicitud en estado Pendiente o Pendiente-revisión, cuando completo el formulario del dictamen y lo envío, el sistema lo firma digitalmente con hash, timestamp y mi usuario, y lo guarda en la base de datos propia.
+1. Dado que abro una solicitud en estado Pendiente o Pendiente-revisión, cuando completo el formulario del dictamen y confirmo el envío, el sistema me pide un segundo factor de autenticación (código a mi cuenta institucional o verificación biométrica del dispositivo) antes de firmarlo; recién entonces lo firma digitalmente con hash, timestamp y mi usuario, y lo guarda en la base de datos propia.
 2. Dado que otro ingeniero envía un dictamen para el mismo caso antes que yo, cuando intento enviar el mío, el sistema rechaza mi envío indicando que el caso ya fue dictaminado.
 3. Dado que el dictamen se firmó correctamente, el sistema envía al SUA el subconjunto de campos correspondiente a los "datos complementarios de la solicitud".
 4. El formulario del dictamen no muestra nombre ni datos de contacto del vecino, solo la información técnica necesaria (ubicación, descripción del reclamo).
@@ -170,7 +171,7 @@ _Cada historia debe incluir formato clásico, criterios de aceptación y validac
 | Valiosa | Sí | Se verifica con el criterio 1: es la acción que efectivamente resuelve el reclamo del vecino y genera el documento con valor legal; sin ella, el resto del sistema no tiene salida. |
 | Estimable | Sí | Las reglas de firma (RF-22) y de exclusión por ejemplar único (RF-21) ya están definidas con precisión suficiente para descomponer la tarea en partes conocidas. |
 | Pequeña | No del todo | Agrupa firma digital, persistencia local y envío al SUA en una sola historia. Podría dividirse en "completar y firmar" vs. "enviar al SUA" si el equipo prefiere historias más chicas. |
-| Verificable | Sí | Se comprueba con el criterio 2: si dos usuarios envían un dictamen para el mismo Número de SUA-Año casi al mismo tiempo, solo el primero en confirmar debe quedar registrado y el segundo debe recibir un rechazo explícito, verificable con una prueba de envíos concurrentes. |
+| Verificable | Sí | Se comprueba con el criterio 2: si dos usuarios envían un dictamen para el mismo Número de SUA-Año casi al mismo tiempo, solo el primero en confirmar debe quedar registrado y el segundo debe recibir un rechazo explícito, verificable con una prueba de envíos concurrentes. También con el criterio 1: un intento de firma sin completar el segundo factor no debe generar hash ni guardar el dictamen, verificable interrumpiendo ese paso. |
 
 ---
 
@@ -234,13 +235,14 @@ _Cada historia debe incluir formato clásico, criterios de aceptación y validac
 |-------|---------|
 | Historia | Como Operador, quiero poder completar y firmar un dictamen aunque no tenga señal en el lugar donde estoy, para no depender de la conectividad del momento para hacer mi trabajo. |
 | Módulo | Trabajo sin conexión y sincronización |
-| Requisitos relacionados | RF-30, RF-31, RF-32 |
+| Requisitos relacionados | RF-30, RF-31, RF-32, RF-52, RNF-16 |
 
 ### Criterios de aceptación
 
 1. Dado que tengo la app instalada como PWA en mi captor y ya generé mi ruta con conexión, cuando pierdo la señal, puedo seguir abriendo los casos de mi ruta y completar el dictamen normalmente.
-2. Dado que firmo un dictamen sin conexión, el sistema lo guarda localmente en el dispositivo con estado "pendiente de sincronizar".
+2. Dado que firmo un dictamen sin conexión, el sistema lo guarda localmente en el dispositivo, cifrado en reposo, con estado "pendiente de sincronizar".
 3. Dado que intento generar una ruta nueva sin conexión, el sistema no lo permite, ya que esa acción requiere conexión.
+4. Dado que alguien falla 5 veces seguidas al intentar iniciar sesión en mi captor, el sistema bloquea el acceso local a la aplicación en ese dispositivo.
 
 ### Validación INVEST
 
@@ -250,7 +252,7 @@ _Cada historia debe incluir formato clásico, criterios de aceptación y validac
 | Negociable | Sí | El mecanismo técnico de almacenamiento local puede decidirse en el diseño sin afectar el criterio de aceptación: que el dictamen quede firmado y guardado aunque no haya señal. |
 | Valiosa | Sí | Se verifica con el criterio 1: sin esto, un ingeniero en una zona sin señal simplemente no podría trabajar, lo cual contradice una condición real y frecuente del trabajo de campo. |
 | Estimable | Parcial | Depende de decisiones técnicas de almacenamiento local (Service Worker, IndexedDB) que pueden requerir un análisis previo. |
-| Pequeña | Sí | Dentro de lo que permite el alcance offline definido: se limita a firmar y guardar localmente (criterio 2), sin incluir la lógica de reintento de envío, que es de HU-10. |
+| Pequeña | Sí | Dentro de lo que permite el alcance offline definido: se limita a firmar y guardar localmente de forma cifrada (criterio 2) y al bloqueo local por intentos fallidos (criterio 4), sin incluir la lógica de reintento de envío, que es de HU-10, ni la revocación remota del dispositivo, que es una acción de Administrador (HU-02). |
 | Verificable | Sí | Se comprueba con el criterio 2: al firmar un dictamen en modo avión, debe quedar visible en el dispositivo con estado 'pendiente de sincronizar', verificable revisando la cola local sin reconectar. |
 
 ---
@@ -261,13 +263,14 @@ _Cada historia debe incluir formato clásico, criterios de aceptación y validac
 |-------|---------|
 | Historia | Como Operador, quiero que los dictámenes que quedaron pendientes de enviar se sincronicen solos apenas recupero señal, para no tener que acordarme de reenviarlos manualmente. |
 | Módulo | Trabajo sin conexión y sincronización |
-| Requisitos relacionados | RF-25, RF-33, RF-34 |
+| Requisitos relacionados | RF-25, RF-33, RF-34, RF-53 |
 
 ### Criterios de aceptación
 
 1. Dado que tengo dictámenes en estado "pendiente de sincronizar", cuando el dispositivo recupera conexión, el sistema los envía automáticamente al SUA sin intervención manual.
 2. Dado que el envío al SUA falla (por ejemplo, el SUA está caído), el sistema mantiene el dictamen en estado "pendiente de sincronizar" y reintenta más adelante.
 3. En todo momento puedo ver un indicador que muestra si está todo sincronizado, cuántos dictámenes tengo pendientes, o si no tengo conexión.
+4. Dado que un dictamen firmado sin conexión llega al servidor con un contenido distinto del que tenía al momento de la firma, el sistema detecta que el hash recalculado no coincide, rechaza la sincronización y lo marca para revisión del Administrador en lugar de darlo por sincronizado.
 
 ### Validación INVEST
 
@@ -278,7 +281,7 @@ _Cada historia debe incluir formato clásico, criterios de aceptación y validac
 | Valiosa | Sí | Se verifica con el criterio 1: sin esto, el trabajo hecho sin conexión (HU-09) nunca llegaría al SUA, y el ingeniero debería recordar reenviarlo manualmente. |
 | Estimable | Sí | Reutiliza el mecanismo de reintento que ya debía existir para el caso 'SUA caído' (RF-25), por lo que no es una lógica nueva desde cero. |
 | Pequeña | Sí | Se limita a la lógica de reintento y al indicador de estado (criterios 1 y 3); no incluye la firma del dictamen en sí, que pertenece a HU-09. |
-| Verificable | Sí | Se comprueba con el criterio 1: al simular la recuperación de conexión con dictámenes en cola, estos deben quedar sincronizados en el SUA sin ninguna acción del usuario, verificable comparando el estado antes y después de reconectar. |
+| Verificable | Sí | Se comprueba con el criterio 1: al simular la recuperación de conexión con dictámenes en cola, estos deben quedar sincronizados en el SUA sin ninguna acción del usuario, verificable comparando el estado antes y después de reconectar. También con el criterio 4: alterando el contenido guardado localmente antes de sincronizar, la sincronización debe rechazarse en lugar de aceptarse. |
 
 ---
 
@@ -335,3 +338,30 @@ _Cada historia debe incluir formato clásico, criterios de aceptación y validac
 | Estimable | Sí | Reutiliza la lógica ya estimada de HU-04 (armado de ruta) y HU-06 (dictaminación), por lo que el esfuerzo adicional es acotado y conocido. |
 | Pequeña | Sí | Al reutilizar la lógica de rutas y dictaminación ya construida, el esfuerzo adicional se limita al filtro por antigüedad y al indicador visual (criterios 2 y 3). |
 | Verificable | Sí | Se comprueba con el criterio 3: al pedir una ruta de tormenta de 5 solicitudes, el sistema debe incluir las 5 con la fecha de derivación más antigua entre las disponibles, verificable ordenando el listado completo por fecha y comparando. |
+
+---
+
+## HU-13 — Consultar el log de auditoría
+
+| Campo | Detalle |
+|-------|---------|
+| Historia | Como Administrador, quiero consultar el log de auditoría de altas, bajas, cambios de rol y de configuración de rutas, para poder revisar quién hizo qué cambio y cuándo ante cualquier incidente o duda. |
+| Módulo | Auditoría |
+| Requisitos relacionados | RF-54, RF-55 |
+
+### Criterios de aceptación
+
+1. Dado que soy Administrador, cuando accedo al log de auditoría, el sistema me muestra cada evento con el usuario que lo generó, la acción realizada y la fecha y hora.
+2. Puedo filtrar el log por usuario, por tipo de acción y por rango de fechas.
+3. No existe, desde la aplicación, ninguna opción para editar o eliminar un evento ya registrado en el log.
+
+### Validación INVEST
+
+| Criterio | ¿Se cumple? | Observación |
+|----------|-------------|-------------|
+| Independiente | Sí | Se puede construir y probar con eventos de auditoría de prueba, generados por acciones ya cubiertas en HU-02; no depende de rutas ni dictámenes. |
+| Negociable | Sí | El diseño exacto de los filtros (criterio 2) puede ajustarse sin afectar el valor de la historia: poder reconstruir quién cambió qué y cuándo. |
+| Valiosa | Sí | Se verifica con el criterio 1: sin este registro, ante un uso indebido de un permiso administrativo no habría forma de reconstruir lo ocurrido, a diferencia del historial de dictámenes que sí existe para la operación diaria. |
+| Estimable | Sí | Reutiliza los eventos que ya deben generarse por RF-54 al modificar usuarios o rutas; no requiere una fuente de datos nueva, solo su consulta. |
+| Pequeña | Sí | Se limita a una vista de solo lectura con filtros (criterios 1 y 2); no incluye exportación ni alertas automáticas. |
+| Verificable | Sí | Se comprueba con el criterio 3: un intento de editar o borrar un evento del log, por cualquier vía de la aplicación, debe ser rechazado o simplemente no estar disponible, verificable revisando que la interfaz no ofrezca esa acción. |

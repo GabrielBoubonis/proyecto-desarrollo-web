@@ -37,6 +37,15 @@ seguimiento para la Dirección.
   puede existir en la Autenticación Institucional y aun así no tener acceso a este sistema
   si el CIL no le creó una cuenta local. El detalle de permisos por rol se define en el
   documento de Requisitos.
+- Ante cualquier fallo de inicio de sesión (usuario inexistente, contraseña incorrecta o
+  usuario no vigente en la Autenticación Institucional), el sistema muestra siempre el
+  **mismo mensaje de error genérico**, sin indicar cuál de los tres motivos lo ocasionó
+  (RF-50) — evita que alguien pueda deducir, probando distintos usuarios, cuáles existen en
+  el sistema.
+- El captor se **bloquea localmente** luego de 5 intentos de inicio de sesión fallidos
+  seguidos, y el Administrador puede **revocar de forma remota** la sesión y los datos
+  locales de un dispositivo reportado como perdido o robado (RF-52), ya que ese dispositivo
+  puede tener dictámenes firmados y fotografías todavía sin sincronizar.
 
 ### 2.2 Lectura de solicitudes del SUA
 
@@ -71,6 +80,14 @@ seguimiento para la Dirección.
   subconjunto de campos que corresponde a esos datos complementarios. Si el envío falla, el
   dictamen queda guardado y firmado localmente con estado **pendiente de sincronizar**, y el
   sistema reintenta el envío automáticamente hasta lograrlo.
+- Al confirmar la firma, el sistema exige un **segundo factor de autenticación** además de
+  la sesión ya iniciada (código a la cuenta institucional o verificación biométrica del
+  dispositivo), dado que el dictamen es el acto que legalmente habilita o no la intervención
+  sobre el ejemplar (RF-51).
+- Al sincronizar un dictamen firmado sin conexión, el sistema **recalcula el hash de firma**
+  sobre el contenido recibido y lo compara contra el generado en el dispositivo al momento
+  de firmar; si no coinciden, la sincronización se rechaza y el dictamen queda marcado para
+  revisión del Administrador en lugar de darse por válido silenciosamente (RF-53).
 - El sistema permite descargar el dictamen como PDF (u otro formato imprimible), para su
   impresión como documento legal cuando sea necesario.
 - Cada caso conserva un **historial de dictámenes**: si un caso vuelve a estar pendiente
@@ -177,6 +194,18 @@ seguimiento para la Dirección.
 - Las solicitudes de tormenta se incluyen en el dashboard general (2.6) como una solicitud
   común, y además cuentan con un desglose propio exclusivo de tormenta.
 
+### 2.8 Auditoría
+
+- El sistema mantiene un **log de auditoría independiente e inmutable** (no editable ni
+  borrable desde la propia aplicación) de toda alta, baja o modificación de rol de un
+  usuario, y de toda reconfiguración de los criterios de generación de rutas: qué usuario
+  realizó la acción, qué acción fue, y cuándo.
+- Es un registro **distinto** del historial de dictámenes (2.3) y del historial de
+  derivaciones (2.4): estos documentan la operación diaria sobre solicitudes y dictámenes;
+  la auditoría documenta cambios sobre la configuración y los permisos del propio sistema.
+- Accesible en modo consulta para el rol **Administrador**, con filtro por usuario, tipo de
+  acción y rango de fechas.
+
 ---
 
 ## 3. Fuera de alcance
@@ -195,6 +224,11 @@ seguimiento para la Dirección.
   credenciales de producción) la configura el **CIL**, no el equipo de desarrollo.
 - **Definición de permisos detallados por rol**: se nombran los cuatro roles, pero el
   detalle de qué puede hacer cada uno se especifica en el documento de Requisitos.
+- **Actualización o reemplazo del parque informático existente** (sistemas operativos sin
+  soporte, equipos con recursos insuficientes): es responsabilidad de mantenimiento del
+  **CIL** sobre la infraestructura física ya instalada, no algo que un requisito de este
+  sistema pueda resolver. El sistema se diseña para funcionar sobre esa infraestructura tal
+  como está, sin asumir su actualización.
 
 ---
 
