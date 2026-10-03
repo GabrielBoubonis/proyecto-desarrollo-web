@@ -147,7 +147,60 @@ las credenciales de producción.
 
 ---
 
-## 7. Vacíos cerrados por este documento
+## 7. Manejo de errores y casos de falla
+
+_Catálogo de los puntos de falla más relevantes del sistema y cómo se resuelve cada uno.
+Varios ya están decididos en otras secciones de este documento o en los `.md` de cátedra —
+acá se los junta en un solo lugar, con los que todavía no tenían una resolución explícita.
+El objetivo es que quien construya el sistema no tenga que adivinar qué hacer frente a cada
+escenario de falla._
+
+### 7.1 Autenticación y sesión
+
+| Escenario | Qué hace el sistema |
+|---|---|
+| El JWT (30 min) vence a mitad de un formulario largo (dictamen, 5 pasos). | El cliente renueva el JWT en segundo plano con el refresh token mientras haya actividad, sin interrumpir al usuario. Si el refresh token también venció (tope de 7 días, RNF-20), recién ahí se pide reautenticar, y los datos ya cargados en el formulario se conservan (no se pierden al volver a loguearse). |
+| Se revoca el captor de un ingeniero (RF-52) mientras tiene una sesión activa en ese dispositivo. | La revocación invalida el refresh token de inmediato en el servidor. La próxima petición de ese dispositivo (no hay que esperar a que venza el JWT de 30 min) es rechazada y el cliente muestra "sesión finalizada por un administrador", sin reintentar silenciosamente. |
+| Falla la verificación WebAuthn al firmar, o el usuario la cancela. | Ya resuelto: el dictamen vuelve al Paso 5 con los datos intactos, sin firmar (ver CU-06, excepción, y wireframe `04b-segundo-factor.svg`). |
+
+### 7.2 Conectividad y sincronización offline
+
+| Escenario | Qué hace el sistema |
+|---|---|
+| Falla el guardado local de un dictamen firmado sin conexión. | Ya resuelto: estado de error visual con reintento manual (ver wireframe `04c-error-guardado-offline.svg`, caso de borde de HU-09). |
+| Se pierde la conexión justo después de que el servidor recibe un dictamen de la cola offline, antes de que la confirmación (ACK) llegue al dispositivo. | Cada dictamen firmado localmente lleva un UUID generado en el dispositivo al momento de la firma. `/sync/dictamenes` usa ese UUID como clave de idempotencia: si el mismo UUID llega dos veces (por un reintento automático), el servidor no crea un segundo registro. |
+| El mismo ingeniero sincroniza desde dos dispositivos distintos (perdió el celular, usa uno de respaldo). | El UUID por dictamen evita duplicados aunque las dos colas se sincronicen por separado. La organización de un solo captor activo por ingeniero es una política operativa, no una restricción técnica del sistema. |
+| OpenRouteService no responde al generar una ruta. | Ya resuelto: selección solo por antigüedad, sin desempate por distancia, hasta que el servicio vuelva a responder (ver sección 5, punto 5). |
+| Falla la geocodificación de una Solicitud al derivarse. | Ya resuelto: la Solicitud queda disponible para consulta y dictamen manual, pero sin coordenadas, excluida del cálculo de rutas hasta corregirse (ver `er-modelo.md`, Decisión 9). |
+| El mock de SUA / Autenticación Institucional no responde (en producción: el servicio real cae) durante el login. | El sistema informa que no pudo verificar las credenciales y pide reintentar; no existe una copia cacheada de credenciales institucionales con la que loguear "igual" en ese momento. |
+
+### 7.3 Concurrencia e integridad de datos
+
+| Escenario | Qué hace el sistema |
+|---|---|
+| Dos ingenieros generan ruta casi al mismo tiempo y compiten por las mismas solicitudes. | Ya resuelto: condición de carrera analizada en `Slicing.md`, Parte B (fila 1 de la tabla de excepciones). |
+| Doble clic en "Confirmar ruta" o en el botón de firma del dictamen. | El botón se deshabilita apenas se registra el primer clic (UI optimista) y, del lado del servidor, la misma petición repetida no duplica nada gracias al UUID de idempotencia (igual mecanismo que en sincronización offline). |
+| Dos ingenieros cargan, sin verse entre sí (uno de ellos sin conexión), un dictamen para el mismo ejemplar. | La validación de "no existe ya un dictamen activo" (RF-21) se re-chequea en el servidor al sincronizar, no solo en el cliente. Si hay conflicto, el segundo dictamen en llegar no se descarta silenciosamente: la Solicitud pasa a estado Pendiente-revisión para que un Jefe decida cuál dictamen prevalece (mismo estado que ya usa RF-09 a RF-13). |
+| Una solicitud de tormenta reservada en una ruta del Protocolo por tormenta se intenta tomar también desde una ruta normal. | No es posible: toda Solicitud solo puede tener una fila activa en `RutaSolicitud` a la vez (ver `er-modelo.md`), sin importar si la ruta que la reservó es normal o de tormenta. |
+
+### 7.4 Archivos y documentos
+
+| Escenario | Qué hace el sistema |
+|---|---|
+| Falla la subida de una fotografía durante la sincronización de un dictamen (las demás fotos y los datos del dictamen sí llegan). | El dictamen no se marca `sincronizado` hasta que todas sus fotos lleguen con éxito. En el próximo intento de sync solo se reintenta la foto faltante, no el dictamen completo. |
+| Una fotografía es demasiado pesada para el almacenamiento offline limitado del dispositivo. | Se comprime en el cliente antes de guardarla en IndexedDB (redimensionado vía `canvas`, apuntando a ~1-2 MB por foto) para no agotar la cuota de almacenamiento del navegador con unas pocas fotos de alta resolución. |
+| Falla la generación del PDF de un dictamen (RF-26, CU-08). | El PDF se genera on-demand en cada descarga, no se pre-genera ni se guarda una sola copia: una falla puntual no deja al dictamen sin PDF disponible para siempre, el usuario simplemente reintenta la descarga. |
+
+### 7.5 Reportes y auditoría
+
+| Escenario | Qué hace el sistema |
+|---|---|
+| El Dashboard podría mostrar datos desactualizados si una Solicitud cambia de estado justo mientras alguien lo está mirando. | Los KPIs se calculan on-demand en cada consulta (`GET /dashboard`), no se cachean ni se recalculan por lote, así que no hay ventana de desincronización entre vistas. |
+| El registro de auditoría de una acción administrativa (por ejemplo, un alta de usuario) falla, pero la acción principal ya se ejecutó. | La acción principal y su fila en `RegistroAuditoria` se ejecutan en una sola transacción de base de datos: si el registro de auditoría falla, toda la operación se revierte. Ninguna acción administrativa relevante queda sin su rastro (RF-54). |
+
+---
+
+## 8. Vacíos cerrados por este documento
 
 | Vacío identificado en la revisión | Resuelto en |
 |---|---|
@@ -160,6 +213,7 @@ las credenciales de producción.
 | Métrica de "eficiencia" sin definir (RF-47, pendiente del DoR) | Sección 5 |
 | Tecnología de almacenamiento offline sin decidir (HU-09) | Sección 6 |
 | Rate-limiting server-side, tope de sesión, cabeceras HTTP, borrado post-sync | Sección 4 |
+| Manejo de errores y casos de falla no catalogado | Sección 7 |
 
 **Lo que sigue sin poder cerrarse acá** (depende de terceros, ver reporte de vacíos
 anterior en la conversación): el esquema real de campos del SUA y de la Autenticación
