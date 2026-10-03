@@ -35,7 +35,9 @@ Por eso el botón principal es grande y de alto contraste, y el campo de contras
 un ícono para mostrar/ocultar el valor — útil cuando el ingeniero escribe con guantes o con
 una sola mano mientras sostiene el celular. El mensaje de error es genérico ("usuario o
 contraseña incorrectos"), sin indicar cuál de los dos falló, siguiendo la misma lógica de
-seguridad que ya definimos en Requisitos (RF-01 a RF-03).
+seguridad que ya definimos en Requisitos (RF-01 a RF-03, RF-50): el texto es idéntico tanto
+si el usuario no existe como si la contraseña es incorrecta, para no darle a un atacante
+una pista de cuáles nombres de usuario son válidos.
 
 **Formulario (si aplica):**
 - Cantidad de campos: 2 (usuario, contraseña).
@@ -128,7 +130,10 @@ reserva esas solicitudes y las saca de la disponibilidad de otros ingenieros (RF
 
 ## Pantalla / Módulo 4 — Formulario de dictamen técnico
 
-**Wireframe:** `diagramas/wireframes/04-formulario-dictamen.svg`
+**Wireframe:** `diagramas/wireframes/04-formulario-dictamen.svg` (flujo de los 5 pasos),
+`diagramas/wireframes/04b-segundo-factor.svg` (modal de verificación al firmar, RF-51) y
+`diagramas/wireframes/04c-error-guardado-offline.svg` (estado de error si falla el guardado
+local sin conexión, caso de borde de HU-09 que antes solo cubría el guardado exitoso).
 
 **Patrones de diseño utilizados:** Formulario en pasos (Step-by-Step Form), indicador de
 estado offline, campos deshabilitados condicionalmente.
@@ -163,11 +168,21 @@ quede claro que el formulario completo no es corto:
 5. **Observaciones y firma** — **Nivel de prioridad de la intervención\*** (Alta/Media/Baja:
    la urgencia con la que hay que *ejecutar* lo dictaminado, no confundir con la prioridad
    de triage de la Solicitud que ya se usó para armar la ruta — ver Decisión 6 en
-   `er_modelo.md`), Observaciones (texto libre), resumen de lo cargado en los 4 pasos
+   `er-modelo.md`), Observaciones (texto libre), resumen de lo cargado en los 4 pasos
    anteriores, y el botón que dispara la firma digital (hash + timestamp + usuario). El
    nivel de prioridad se completa deliberadamente acá y no junto a "Complejidad" del Paso 4:
    es la última decisión técnica que el ingeniero toma, ya con el diagnóstico completo,
-   justo antes de firmar — un paso propio en vez de un campo más entre los demás.
+   justo antes de firmar — un paso propio en vez de un campo más entre los demás. Al tocar
+   el botón de firma, el sistema no firma de inmediato: muestra un modal de verificación
+   biométrica del dispositivo (WebAuthn — huella o reconocimiento facial, ya disponible en
+   los captores Android) antes de completar la firma digital (RF-51; ver wireframe
+   `04b-segundo-factor.svg`). Se eligió biometría del dispositivo en vez de un código enviado
+   por otro canal porque no depende de que el captor tenga conexión ni de que el email
+   institucional esté accesible en el momento de firmar, algo relevante porque este paso
+   puede ocurrir sin señal (CU-10). Si el segundo factor falla o se cancela, el dictamen
+   queda sin firmar y el ingeniero vuelve al Paso 5 con los datos ya cargados intactos
+   (CU-06, excepción). Este paso extra se agrega únicamente acá —no en el login— porque lo
+   que protege es el acto legal de firmar un dictamen, no el acceso general al sistema.
 
 El indicador de "SIN SEÑAL" en el encabezado no es decorativo: comunica en todo momento si
 el dictamen que está por firmar se va a guardar localmente en estado pendiente de
@@ -279,16 +294,48 @@ número incremental), para que quede claro que no lo tipea manualmente.
 puntual — es infraestructura típica de cualquier sistema con login (cerrar sesión, ver
 quién está usando el dispositivo). Se agrega igual porque aparece referenciada en la
 navegación de las demás pantallas y, sin ella, "cerrar sesión" no tendría un lugar propio.
-Se diseñó de forma simple y genérica: no está basada en ninguna referencia visual concreta,
-porque la imagen que se iba a usar como modelo para esta pantalla no llegó a compartirse en
-la conversación. Si en algún momento se define una referencia puntual, esta ficha es la
-que hay que actualizar. Muestra además el estado de sincronización con más detalle que el
+Se diseñó de forma simple y genérica, sin una referencia visual puntual, porque a diferencia
+del resto de las pantallas no replica un formulario físico existente ni un patrón ya
+validado en otra parte del sistema. Si en algún momento el equipo define una referencia
+concreta para esta pantalla, esta ficha es la que hay que actualizar. Muestra además el estado de sincronización con más detalle que el
 ícono del encabezado (cantidad exacta de dictámenes pendientes de enviar), útil como lugar
 de consulta cuando el ingeniero quiere confirmar que no dejó nada sin sincronizar antes de
 terminar la jornada.
 
 **Formulario (si aplica):** No aplica (no hay campos de carga, solo navegación y una
 acción de cierre de sesión).
+
+---
+
+## Pantalla / Módulo 9 — Auditoría (Administrador)
+
+**Wireframe:** `diagramas/wireframes/09-auditoria.svg`
+
+**Patrones de diseño utilizados:** Tabla con paginación / listado equivalente en mobile
+(el mismo patrón ya usado en el Módulo 7 — Gestión de usuarios), filtros combinados.
+
+**Justificación:** Esta pantalla resuelve CU-13 y la consulta con filtros de RF-55. Se
+reutiliza deliberadamente el mismo patrón visual del Módulo 7 (listado/tabla con
+paginación) en vez de inventar uno nuevo: ambas pantallas muestran un conjunto de registros
+históricos, exclusivos del Administrador, que se consultan ocasionalmente y no se editan
+desde la propia pantalla — el registro de auditoría ni siquiera se puede editar o borrar
+(es append-only, ver Decisión 8 en `er-modelo.md`), así que no hay ninguna acción de alta,
+modificación o borrado que agregar a la interfaz, a diferencia del Módulo 7. Cada fila
+muestra usuario que ejecutó la acción, tipo de acción, entidad afectada y fecha/hora, de
+más reciente a más antigua (RF-54). Los filtros (por usuario, por tipo de acción y por
+rango de fechas) se agrupan en una barra superior colapsable en mobile, para no ocupar
+espacio permanente en una pantalla que ya es una lista larga. Si no hay eventos que
+cumplan el filtro aplicado, se muestra el mismo patrón de "listado vacío con mensaje" que
+ya usan otras pantallas del sistema (CU-13, excepción E1), en lugar de una tabla en blanco
+sin explicación.
+
+**Formulario (si aplica):**
+- Cantidad de campos: 3 filtros opcionales (usuario, tipo de acción, rango de fechas); no
+  hay formulario de carga, ya que la pantalla es de solo consulta.
+- Flujo: todo en una pantalla (listado con filtros y paginación).
+- Validaciones relevantes: ninguna de carga de datos; el único comportamiento a validar es
+  que el rango de fechas tenga una fecha de inicio anterior o igual a la de fin antes de
+  aplicar el filtro.
 
 ---
 

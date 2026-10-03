@@ -125,7 +125,12 @@ seguimiento para la Dirección.
   solicitudes que cumplen los criterios anteriores superan la cantidad pedida por el
   ingeniero, el sistema selecciona cuáles incluir combinando dos factores: **antigüedad**
   de la solicitud (preferencia a las más antiguas) y **eficiencia del recorrido
-  resultante** (menor tiempo y distancia total según el modo de desplazamiento elegido).
+  resultante**, entendida concretamente como la **distancia total estimada en metros**
+  del recorrido (no el tiempo, que varía con el tráfico y es menos reproducible para
+  testear). Las solicitudes se agrupan primero en franjas de antigüedad de 2 días
+  corridos; dentro de la misma franja, se prioriza la que genera menor distancia
+  acumulada respecto del resto de la ruta ya seleccionada. _(Detalle del algoritmo en
+  `arquitectura_tecnica.md`.)_
 - **Criterio de orden de visita:** una vez seleccionadas las solicitudes, el sistema ordena
   su visita minimizando el tiempo y la distancia total del recorrido. El punto de partida
   del cálculo es la sede de la **Dirección General de Parques y Paseos**, usada también

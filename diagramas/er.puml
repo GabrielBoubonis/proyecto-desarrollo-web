@@ -10,7 +10,7 @@ skinparam class {
 }
 
 entity "Usuario" as usuario {
-  * nombre_usuario : PK <<string>>
+  * nombre_usuario : string <<PK>>
   --
   contraseña_hash : string
   rol : string
@@ -19,33 +19,46 @@ entity "Usuario" as usuario {
 }
 
 entity "Solicitud" as solicitud {
-  * numero_sua : PK <<string>>
-  * anio : PK <<int>>
+  * numero_sua : string <<PK>>
+  * anio : int <<PK>>
   --
   distrito : string
   prioridad : string
   direccion : string
+  latitud : decimal
+  longitud : decimal
   descripcion_reclamo : string
   estado : string
   es_tormenta : boolean
   fecha_ultima_derivacion : date
 }
 
+note right of solicitud
+  <b>latitud / longitud</b>: resultado de geocodificar
+  `direccion` una sola vez, al momento de la derivación
+  (API de Geocoding de OpenRouteService), y cachearlo
+  acá para no volver a geocodificar cada vez que se
+  genera una ruta. Si la geocodificación falla, la
+  Solicitud queda disponible igual pero sin estos dos
+  campos hasta corregirse manualmente. Ver Decisión 9
+  en er-modelo.md y RNF-14 en requisitos.md.
+end note
+
 entity "HistorialDerivacion" as historial {
-  * id_derivacion : PK <<int>>
+  * id_derivacion : int <<PK>>
   --
-  numero_sua : FK <<string>>
-  anio : FK <<int>>
+  numero_sua : string <<FK>>
+  anio : int <<FK>>
   fecha_derivacion : date
   motivo : string
 }
 
 entity "Dictamen" as dictamen {
-  * id_dictamen : PK <<int>>
+  * id_dictamen : int <<PK>>
   --
-  numero_sua : FK <<string>>
-  anio : FK <<int>>
-  nombre_usuario : FK <<string>>
+  numero_sua : string <<FK>>
+  anio : int <<FK>>
+  nombre_usuario : string <<FK>>
   nota_numero : string
   expediente_numero : string
   fecha_emision : date
@@ -89,7 +102,7 @@ note right of dictamen
   base de datos que lo exprese de forma directa): es
   una regla de negocio que valida la aplicación antes
   de guardar o firmar el dictamen.
-  Ver Decisión 5 en er_modelo.md y RF-46 en requisitos.md.
+  Ver Decisión 5 en er-modelo.md y RF-46 en requisitos.md.
   --
   <b>complejidad</b> es la complejidad de la intervención
   a realizar, un dato propio del dictamen (Baja / Media /
@@ -121,32 +134,32 @@ note right of ruta
 end note
 
 entity "Fotografia" as foto {
-  * id_foto : PK <<int>>
+  * id_foto : int <<PK>>
   --
-  id_dictamen : FK <<int>>
+  id_dictamen : int <<FK>>
   archivo_referencia : string
   orden : int
 }
 
 entity "TrabajoAereo" as trabajo_aereo {
-  * id_trabajo_aereo : PK <<int>>
+  * id_trabajo_aereo : int <<PK>>
   --
-  id_dictamen : FK <<int>>
+  id_dictamen : int <<FK>>
   tipo_trabajo : string
 }
 
 entity "TrabajoSubterraneo" as trabajo_subterraneo {
-  * id_trabajo_subterraneo : PK <<int>>
+  * id_trabajo_subterraneo : int <<PK>>
   --
-  id_dictamen : FK <<int>>
+  id_dictamen : int <<FK>>
   tipo_trabajo : string
   distancia_borde : decimal
 }
 
 entity "Ruta" as ruta {
-  * id_ruta : PK <<int>>
+  * id_ruta : int <<PK>>
   --
-  nombre_usuario : FK <<string>>
+  nombre_usuario : string <<FK>>
   fecha : date
   tipo : string
   estado : string
@@ -154,17 +167,37 @@ entity "Ruta" as ruta {
 }
 
 entity "RutaSolicitud" as ruta_solicitud {
-  * id_ruta : PK, FK <<int>>
-  * numero_sua : PK, FK <<string>>
-  * anio : PK, FK <<int>>
+  * id_ruta : int <<PK, FK>>
+  * numero_sua : string <<PK, FK>>
+  * anio : int <<PK, FK>>
   --
   fecha_incorporacion : datetime
   liberada : boolean
   fecha_liberacion : datetime
 }
 
+entity "RegistroAuditoria" as auditoria {
+  * id_auditoria : int <<PK>>
+  --
+  nombre_usuario : string <<FK>>
+  accion : string
+  entidad_afectada : string
+  valor_anterior : string
+  valor_nuevo : string
+  fecha_hora : datetime
+}
+
+note right of auditoria
+  <b>Append-only</b>: esta entidad solo admite
+  INSERT y SELECT. Ningún flujo del sistema
+  expone UPDATE ni DELETE sobre sus filas
+  (registro inmutable, RF-54). Ver Decisión 8
+  en er-modelo.md y CU-13 en casos_de_uso.md.
+end note
+
 usuario ||--o{ dictamen : firma
 usuario ||--o{ ruta : genera
+usuario ||--o{ auditoria : genera
 
 solicitud ||--o{ dictamen : "tiene historial de"
 solicitud ||--o{ historial : "registra derivaciones"

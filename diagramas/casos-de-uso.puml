@@ -54,8 +54,8 @@ JF --> CU08
 
 OP --> CU12
 JF --> CU12
-AD ..> CU12 : <<solo consulta>>
-LE ..> CU12 : <<solo consulta>>
+AD --> CU12
+LE --> CU12
 
 AD --> CU02
 AD --> CU13

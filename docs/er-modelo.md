@@ -47,6 +47,8 @@ _Visualizar en [plantuml.com](https://www.plantuml.com/plantuml/uml/)._
   después de dictaminar (ver Decisión 6).
 - `direccion` (`string`): domicilio de la solicitud tal como lo reporta el SUA (puede no
   coincidir con la ubicación exacta del ejemplar; ver `domicilio_ejemplar` en Dictamen).
+- `latitud` (`decimal`), `longitud` (`decimal`): coordenadas resultantes de geocodificar
+  `direccion`, cacheadas para el cálculo de rutas (RF-47, RF-48, RNF-14). Ver Decisión 9.
 - `descripcion_reclamo` (`string`): texto técnico del problema reportado, sin datos
   personales del vecino (RF-29).
 - `estado` (`string`): Pendiente, Dictaminada o Pendiente-revisión.
@@ -313,7 +315,7 @@ visita entre las seleccionadas. Se resolvió de la siguiente manera:
   el sistema solo usa el modo de desplazamiento para estimar tiempo y distancia.
 - El algoritmo concreto (heurística de ruteo, servicio de mapas usado) queda como decisión
   técnica de implementación — ver RNF-14 y la validación INVEST de HU-04 en
-  `historias_usuario.md`, donde se deja explícito que esto puede requerir un análisis
+  `historias-de-usuario.md`, donde se deja explícito que esto puede requerir un análisis
   técnico previo.
 
 ### Decisión 8 — Registro de auditoría inmutable, independiente del historial de negocio
@@ -337,5 +339,26 @@ este historial:
   propio registro de auditoría sin dejar un evento adicional que lo documente.
 
 Esta decisión está directamente ligada a RF-54 (registro inmutable), RF-55 (consulta con
-filtros) en `requisitos.md`, a HU-13 en `historias_usuario.md` y a CU-13 en
+filtros) en `requisitos.md`, a HU-13 en `historias-de-usuario.md` y a CU-13 en
 `casos_de_uso.md`.
+
+### Decisión 9 — Geocodificar la dirección una sola vez, al momento de la derivación
+
+`Solicitud.direccion` es un campo de texto tal como lo reporta el SUA, pero RF-47 y RF-48
+necesitan distancia y tiempo entre puntos para seleccionar y ordenar las solicitudes de una
+ruta. Se evaluaron dos opciones:
+
+- **Geocodificar la dirección en cada generación de ruta.** Se descartó: implica una llamada
+  extra al servicio de mapas por cada solicitud candidata, cada vez que un ingeniero genera
+  una ruta, cuando la dirección de una solicitud no cambia entre una generación y la
+  siguiente.
+- **Geocodificar una sola vez y cachear el resultado (la elegida).** Se agregan `latitud` y
+  `longitud` a `Solicitud`, completados por el sistema la primera vez que la solicitud se
+  deriva (vía la API de Geocoding de OpenRouteService, ver `arquitectura_tecnica.md`,
+  sección 5). Generar una ruta después solo lee estas coordenadas, sin volver a geocodificar.
+
+Si la geocodificación falla (dirección ambigua o servicio caído en el momento de la
+derivación), la Solicitud queda disponible igual para consulta y dictamen manual, pero sin
+coordenadas: se excluye del cálculo de distancia hasta que se corrija manualmente o se
+reintente la geocodificación. No es un caso bloqueante para el resto del sistema, solo para
+el armado automático de rutas de esa solicitud puntual.

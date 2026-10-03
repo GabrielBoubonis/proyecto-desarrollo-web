@@ -47,7 +47,7 @@ poder trabajar sin conexión en el campo.
 | RF-17 | El sistema debe liberar automáticamente una solicitud reservada en una ruta cuando: se dictamina, el ingeniero presiona "Restablecer", o son las 18:00 hs del día. |
 | RF-18 | El sistema debe permitir a un ingeniero descartar su ruta completa mediante el botón "Restablecer", liberando las solicitudes no dictaminadas. |
 | RF-19 | El sistema debe requerir conexión a internet para generar o confirmar una ruta (no disponible en modo offline). |
-| RF-47 | Cuando la cantidad de solicitudes que cumplen los criterios definidos (RF-15) supere el cupo indicado por el ingeniero, el sistema debe seleccionar cuáles incluir combinando antigüedad de la solicitud (mayor preferencia a las más antiguas) y eficiencia del recorrido resultante (menor tiempo y distancia total según el modo de desplazamiento). |
+| RF-47 | Cuando la cantidad de solicitudes que cumplen los criterios definidos (RF-15) supere el cupo indicado por el ingeniero, el sistema debe seleccionar cuáles incluir combinando antigüedad de la solicitud (mayor preferencia a las más antiguas) y eficiencia del recorrido resultante (menor tiempo y distancia total según el modo de desplazamiento). _(Nota técnica: criterio de desempate y métrica de eficiencia concretos en `arquitectura_tecnica.md`.)_ |
 | RF-48 | El sistema debe calcular el orden de visita de las solicitudes de una ruta minimizando el tiempo y la distancia total del recorrido, tomando como punto de partida y de cierre del cálculo la sede de la Dirección General de Parques y Paseos. |
 | RF-49 | El sistema debe permitir seleccionar el modo de desplazamiento (a pie o en vehículo) como criterio adicional al generar la ruta, y calcular el tiempo y la distancia en función del modo elegido. |
 
@@ -67,7 +67,7 @@ poder trabajar sin conexión en el campo.
 | RF-29 | El sistema debe limitar los datos del vecino visibles a lo estrictamente necesario para el trabajo técnico (ubicación y descripción del reclamo), excluyendo nombre y datos de contacto. |
 | RF-45 | El sistema debe exigir al menos una fotografía del ejemplar adjunta a cada dictamen, y no debe permitir firmarlo si no hay ninguna cargada. |
 | RF-46 | Si el ingeniero marca "Extracción" en el dictamen, el sistema debe deshabilitar la selección de trabajos en la parte aérea y en la parte subterránea para ese mismo dictamen, y debe rechazar el envío si de todos modos llegaran cargados. |
-| RF-51 | Al confirmar la firma de un dictamen (paso 3 de CU-06), el sistema debe exigir un segundo factor de autenticación (código enviado a la cuenta institucional del usuario, o verificación biométrica propia del dispositivo) además de la sesión ya iniciada, dado el valor legal del acto conforme a la Ordenanza N.° 5.118/91. |
+| RF-51 | Al confirmar la firma de un dictamen (paso 3 de CU-06), el sistema debe exigir un segundo factor de autenticación mediante verificación biométrica del dispositivo (WebAuthn), además de la sesión ya iniciada, dado el valor legal del acto conforme a la Ordenanza N.° 5.118/91. _(Nota técnica: detalle del flujo WebAuthn en `arquitectura_tecnica.md`.)_ |
 
 ### Módulo 5 — Trabajo sin conexión y sincronización
 
@@ -79,7 +79,7 @@ poder trabajar sin conexión en el campo.
 | RF-33 | El sistema debe reintentar automáticamente el envío de los dictámenes pendientes de sincronizar en cuanto detecte conexión, sin intervención manual del usuario. |
 | RF-34 | El sistema debe mostrar al ingeniero un indicador permanente del estado de sincronización (todo sincronizado / cantidad de dictámenes pendientes / sin conexión). |
 | RF-52 | El sistema debe bloquear el acceso local a la aplicación en el captor luego de 5 intentos de inicio de sesión fallidos consecutivos, y debe permitir a un Administrador revocar de forma remota la sesión y los datos locales de un captor reportado como perdido o robado, en cuanto el dispositivo vuelva a tener conexión. |
-| RF-53 | Al sincronizar un dictamen firmado sin conexión (CU-10), el sistema debe recalcular el hash de firma sobre el contenido recibido y compararlo contra el hash generado al momento de la firma en el dispositivo; si no coinciden, debe rechazar la sincronización, conservar el dictamen marcado como "íntegridad no verificada" y notificar al Administrador. |
+| RF-53 | Al sincronizar un dictamen firmado sin conexión (CU-10), el sistema debe recalcular el hash de firma (SHA-256) sobre el contenido recibido y compararlo contra el hash generado al momento de la firma en el dispositivo; si no coinciden, debe rechazar la sincronización, conservar el dictamen marcado como "íntegridad no verificada" y notificar al Administrador. |
 
 ### Módulo 6 — Dashboard
 
@@ -125,13 +125,16 @@ poder trabajar sin conexión en el campo.
 
 | ID | Requisito |
 |----|-----------|
-| RNF-05 | La contraseña local debe exigir un mínimo de 8 caracteres, con al menos una mayúscula, una minúscula, un número y un carácter especial. |
+| RNF-05 | La contraseña local debe exigir un mínimo de 8 caracteres, con al menos una mayúscula, una minúscula, un número y un carácter especial, y debe almacenarse con un algoritmo de hash robusto (bcrypt), nunca en texto plano. |
 | RNF-06 | El sistema no debe almacenar ni transmitir la contraseña institucional del usuario; la validación institucional se realiza solo con usuario + API key propia. |
 | RNF-07 | El sistema debe usar HTTPS/TLS en todas las comunicaciones con el SUA, la Autenticación Institucional y entre cliente y servidor. |
 | RNF-08 | El sistema debe limitar los datos personales del vecino que consulta y almacena a los estrictamente necesarios para el trabajo técnico. |
 | RNF-09 | La interfaz debe ser utilizable en pantallas de celular (diseño responsive), dado que el ingeniero trabaja desde un captor en el campo. |
-| RNF-16 | Los dictámenes y fotografías almacenados localmente en el captor en estado "pendiente de sincronizar" deben guardarse cifrados en reposo (at-rest), de forma que no sean legibles si el dispositivo se pierde o es sustraído. |
+| RNF-16 | Los dictámenes y fotografías almacenados localmente en el captor en estado "pendiente de sincronizar" deben guardarse cifrados en reposo (at-rest, AES-GCM), de forma que no sean legibles si el dispositivo se pierde o es sustraído, y deben eliminarse del almacenamiento local inmediatamente después de confirmarse su sincronización con el servidor. |
 | RNF-18 | El sistema debe validar y sanear (tipo, longitud y caracteres permitidos) todo dato recibido del SUA antes de persistirlo, rechazando o marcando para revisión manual del Administrador cualquier registro que no cumpla el esquema esperado. |
+| RNF-19 | El sistema debe limitar server-side los intentos de inicio de sesión (máximo 10 intentos cada 15 minutos por combinación de IP y usuario, con espera creciente entre bloqueos), como defensa adicional e independiente del bloqueo local del captor (RF-52) contra ataques de fuerza bruta distribuidos desde múltiples orígenes. |
+| RNF-20 | La sesión de un usuario no debe mantenerse activa, mediante renovación por refresh token, por más de 7 días corridos desde el primer inicio de sesión, independientemente de cuánta actividad registre en ese lapso. |
+| RNF-21 | El sistema debe incluir cabeceras de seguridad HTTP (Content-Security-Policy, HSTS, X-Frame-Options) en todas las respuestas, para mitigar ataques de tipo XSS y clickjacking sobre la interfaz web/PWA. |
 
 ### Almacenamiento y continuidad
 
@@ -146,4 +149,4 @@ poder trabajar sin conexión en el campo.
 |----|-----------|
 | RNF-12 | El sistema debe funcionar como PWA instalable en dispositivos Android (captores provistos por la organización). |
 | RNF-13 | El sistema no requiere soporte para iOS, dado que los dispositivos de campo son exclusivamente Android. |
-| RNF-14 | El sistema debe utilizar un servicio de mapas/geolocalización de uso gratuito para la generación de rutas, que soporte el cálculo de distancia y tiempo estimado tanto a pie como en vehículo. |
+| RNF-14 | El sistema debe utilizar un servicio de mapas/geolocalización de uso gratuito para la generación de rutas, que soporte el cálculo de distancia y tiempo estimado tanto a pie como en vehículo (se eligió OpenRouteService; detalle en `arquitectura_tecnica.md`). |
