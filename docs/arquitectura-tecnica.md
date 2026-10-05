@@ -200,7 +200,53 @@ escenario de falla._
 
 ---
 
-## 8. Vacíos cerrados por este documento
+## 8. Configuración base de los captores (RNF-22)
+
+_Esto **no se programa dentro de la PWA**: una aplicación web no puede apagar ni reiniciar un
+equipo ni controlar el Wi-Fi o los datos móviles. Se resuelve configurando el dispositivo
+como **dispositivo dedicado** (Android Enterprise, modo "lock task" / kiosco) y gestionándolo
+con una herramienta de administración de dispositivos (MDM) gratuita u open source, por
+ejemplo Headwind MDM. Es una especificación de aprovisionamiento para el CIL, que es quien
+entrega y administra los captores (ver `alcance.md` §3)._
+
+| Control | Cómo se logra | Límite conocido |
+|---|---|---|
+| Bloqueo de pantalla obligatorio con PIN o huella, sin opción "deslizar" ni "ninguno". | Política de contraseña de la MDM (complejidad y tiempo de bloqueo automático). | Ninguno relevante: es una política estándar. |
+| No se puede apagar ni reiniciar sin autenticarse. | El menú de energía no se ofrece con el equipo bloqueado (en modo kiosco se deshabilita el menú de acciones globales). Al encender, el equipo arranca bloqueado y exige PIN o huella; con el cifrado de almacenamiento activo, los datos locales (RNF-16) siguen ilegibles sin esa credencial. | Un reinicio forzado por hardware (mantener el botón de encendido) no se puede impedir por software en ningún Android: la defensa es que el equipo vuelve a arrancar bloqueado y cifrado, y que la MDM registra el evento. |
+| No se puede desactivar Wi-Fi, datos móviles ni modo avión sin autenticarse. | Restricciones de usuario aplicadas por la MDM (`DISALLOW_CONFIG_WIFI`, `DISALLOW_CONFIG_MOBILE_NETWORKS`, `DISALLOW_AIRPLANE_MODE`) y panel de ajustes rápidos oculto en modo kiosco. | Apagar la conexión también impide la sincronización (RF-33); los dictámenes siguen guardándose cifrados localmente (RF-31, RNF-16) hasta que vuelva la conexión. |
+| Sin modo seguro, sin restablecimiento de fábrica ni cuentas de usuario extra. | `DISALLOW_SAFE_BOOT`, `DISALLOW_FACTORY_RESET`, `DISALLOW_ADD_USER`. | Los nombres son los de la API de Android; validarlos contra la versión de Android del captor real. |
+| Solo el sistema (y lo mínimo necesario) en pantalla. | Modo kiosco: la PWA instalada es la única aplicación accesible. | Requiere que el captor sea un equipo gestionable (no un celular personal). |
+
+**Decisión abierta para el CIL:** la redacción de RNF-22 permite que el ingeniero, una vez
+autenticado con su PIN o huella, apague el equipo o cambie la conectividad. Una versión más
+estricta —nadie puede cambiarlo, ni autenticado, salvo desde la consola de la MDM— cierra el
+caso de un ingeniero que corta la conexión a propósito, pero impide cosas legítimas como
+activar el modo avión en un vuelo. Se dejó la versión literal; cambiarla es una decisión de
+política, no técnica.
+
+**Relación con los riesgos:** esta configuración es la base para mitigar R-02 (pérdida o
+robo del captor) en el trabajo de Seguridad de los Sistemas: un captor que no se puede
+apagar ni dejar sin conexión sin credencial es un captor que la MDM puede bloquear o borrar
+a distancia.
+
+---
+
+## 9. Operación y disponibilidad (RNF-01, RNF-04, RNF-10, RNF-11)
+
+- **Timeout de red (RNF-04):** toda solicitud HTTP de la PWA corta a los **10 segundos**; si
+  no hubo respuesta, se trata como falla de red y el dictamen sigue el camino offline
+  (guardado cifrado local y reintento con espera creciente, RNF-17).
+- **Backup y retención (RNF-10, RNF-11):** la frecuencia de los backups y el lugar donde se
+  guardan los define el **CIL**, que administra la infraestructura real. Para la demo alcanza
+  con un `pg_dump` manual u opcional; no se fija un valor en este documento.
+- **Disponibilidad 24/7 (RNF-01):** el requisito no cambia. Se aclara que la **demo** se
+  ofrece en el mejor esfuerzo, porque los planes gratuitos de hosting (Render, Neon, Supabase)
+  pueden pausar el servicio por inactividad; el 24/7 real depende del hosting institucional
+  del CIL en producción.
+
+---
+
+## 10. Vacíos cerrados por este documento
 
 | Vacío identificado en la revisión | Resuelto en |
 |---|---|
@@ -214,6 +260,10 @@ escenario de falla._
 | Tecnología de almacenamiento offline sin decidir (HU-09) | Sección 6 |
 | Rate-limiting server-side, tope de sesión, cabeceras HTTP, borrado post-sync | Sección 4 |
 | Manejo de errores y casos de falla no catalogado | Sección 7 |
+| Configuración base de los captores (apagado, reinicio, conectividad) | Sección 8 |
+| Timeout de red sin valor concreto (RNF-04) | Sección 9 (10 segundos) |
+| Frecuencia de backup indefinida (RNF-11) | Sección 9 (la define el CIL) |
+| 24/7 incompatible con hosting gratuito de la demo (RNF-01) | Sección 9 (demo en mejor esfuerzo; producción por CIL) |
 
 **Lo que sigue sin poder cerrarse acá** (depende de terceros, ver reporte de vacíos
 anterior en la conversación): el esquema real de campos del SUA y de la Autenticación

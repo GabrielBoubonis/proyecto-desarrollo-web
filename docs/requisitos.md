@@ -117,7 +117,7 @@ poder trabajar sin conexión en el campo.
 | RNF-01 | El sistema debe estar disponible 24/7, salvo ventanas de mantenimiento programadas fuera de la jornada operativa (lunes a sábado, 7 a 17 hs). |
 | RNF-02 | El sistema debe soportar el uso simultáneo de entre 4 y 7 ingenieros sin degradación perceptible del tiempo de respuesta. |
 | RNF-03 | El sistema debe soportar un volumen de al menos 140 dictámenes diarios (aprox. 20 por ingeniero) sin degradación del rendimiento. |
-| RNF-04 | En modo offline, cada solicitud HTTP debe tener un tiempo límite de espera corto (del orden de segundos) para no bloquear la interfaz ante señal intermitente. |
+| RNF-04 | En modo offline, cada solicitud HTTP debe tener un tiempo límite de espera de 10 segundos para no bloquear la interfaz ante señal intermitente. |
 | RNF-15 | El sistema debe soportar la resolución de hasta 100 solicitudes de tormenta dentro de un plazo de 48 horas hábiles, sin degradación del rendimiento. |
 | RNF-17 | Ante una caída específica del SUA (distinta de la falta de conexión general del dispositivo), el sistema debe reintentar automáticamente, con espera creciente entre intentos, la lectura de solicitudes (Módulo 2) y la sincronización de dictámenes (Módulo 5), sin bloquear las funcionalidades que no dependen del SUA (consulta de dictámenes ya cargados, rutas ya generadas). |
 
@@ -135,6 +135,7 @@ poder trabajar sin conexión en el campo.
 | RNF-19 | El sistema debe limitar server-side los intentos de inicio de sesión (máximo 10 intentos cada 15 minutos por combinación de IP y usuario, con espera creciente entre bloqueos), como defensa adicional e independiente del bloqueo local del captor (RF-52) contra ataques de fuerza bruta distribuidos desde múltiples orígenes. |
 | RNF-20 | La sesión de un usuario no debe mantenerse activa, mediante renovación por refresh token, por más de 7 días corridos desde el primer inicio de sesión, independientemente de cuánta actividad registre en ese lapso. |
 | RNF-21 | El sistema debe incluir cabeceras de seguridad HTTP (Content-Security-Policy, HSTS, X-Frame-Options) en todas las respuestas, para mitigar ataques de tipo XSS y clickjacking sobre la interfaz web/PWA. |
+| RNF-22 | Los captores deben entregarse configurados como dispositivos dedicados al sistema, con bloqueo de pantalla obligatorio por PIN o huella, y sin que sea posible apagarlos, reiniciarlos ni desactivar el Wi-Fi, los datos móviles o el modo avión sin autenticarse antes con ese PIN o huella (detalle de configuración en `arquitectura_tecnica.md`). |
 
 ### Almacenamiento y continuidad
 

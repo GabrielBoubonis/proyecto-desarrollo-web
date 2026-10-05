@@ -155,7 +155,7 @@ _Cada historia debe incluir formato clásico, criterios de aceptación y validac
 
 ### Criterios de aceptación
 
-1. Dado que abro una solicitud en estado Pendiente o Pendiente-revisión, cuando completo el formulario del dictamen y confirmo el envío, el sistema me pide un segundo factor de autenticación (código a mi cuenta institucional o verificación biométrica del dispositivo) antes de firmarlo; recién entonces lo firma digitalmente con hash, timestamp y mi usuario, y lo guarda en la base de datos propia.
+1. Dado que abro una solicitud en estado Pendiente o Pendiente-revisión, cuando completo el formulario del dictamen y confirmo el envío, el sistema me pide un segundo factor de autenticación (verificación biométrica del dispositivo, huella o reconocimiento facial) antes de firmarlo; recién entonces lo firma digitalmente con hash, timestamp y mi usuario, y lo guarda en la base de datos propia.
 2. Dado que otro ingeniero envía un dictamen para el mismo caso antes que yo, cuando intento enviar el mío, el sistema rechaza mi envío indicando que el caso ya fue dictaminado.
 3. Dado que el dictamen se firmó correctamente, el sistema envía al SUA el subconjunto de campos correspondiente a los "datos complementarios de la solicitud".
 4. El formulario del dictamen no muestra nombre ni datos de contacto del vecino, solo la información técnica necesaria (ubicación, descripción del reclamo).
@@ -365,3 +365,57 @@ _Cada historia debe incluir formato clásico, criterios de aceptación y validac
 | Estimable | Sí | Reutiliza los eventos que ya deben generarse por RF-54 al modificar usuarios o rutas; no requiere una fuente de datos nueva, solo su consulta. |
 | Pequeña | Sí | Se limita a una vista de solo lectura con filtros (criterios 1 y 2); no incluye exportación ni alertas automáticas. |
 | Verificable | Sí | Se comprueba con el criterio 3: un intento de editar o borrar un evento del log, por cualquier vía de la aplicación, debe ser rechazado o simplemente no estar disponible, verificable revisando que la interfaz no ofrezca esa acción. |
+
+---
+
+## HU-14 — Identificar solicitudes re-derivadas como Pendiente-revisión
+
+| Campo | Detalle |
+|-------|---------|
+| Historia | Como Operador, quiero que una solicitud ya dictaminada que vuelve a derivarse aparezca marcada como Pendiente-revisión, para distinguirla de una solicitud nueva y saber que necesita un nuevo dictamen. |
+| Módulo | Lectura de solicitudes del SUA |
+| Requisitos relacionados | RF-11, RF-12, RF-13 |
+
+### Criterios de aceptación
+
+1. Dado que Procesamiento de Datos re-deriva una solicitud ya dictaminada con el mismo Número de SUA-Año, cuando el sistema la lee, queda marcada como Pendiente-revisión y no como una solicitud nueva.
+2. Una solicitud en Pendiente-revisión se muestra en el listado con una marca visible que la distingue de las Pendientes, y conserva su historial de dictámenes anteriores.
+3. Dado que dictamino y firmo una solicitud en Pendiente-revisión, cuando el dictamen se sincroniza, la solicitud vuelve al estado Dictaminada.
+
+### Validación INVEST
+
+| Criterio | ¿Se cumple? | Observación |
+|----------|-------------|-------------|
+| Independiente | Parcial | Depende de que existan solicitudes ya dictaminadas (HU-06) y de cómo el SUA indique una re-derivación; es una dependencia de datos externa, a confirmar con el CIL/SUA. |
+| Negociable | Sí | La forma de la marca visual (etiqueta, color, ícono) puede definirse en el diseño de UI sin afectar el valor: que el Operador no confunda una re-derivación con un caso nuevo. |
+| Valiosa | Sí | Se verifica con el criterio 1: sin la marca, un caso re-derivado por vencimiento se trataría como nuevo y se perdería su trazabilidad. |
+| Estimable | Parcial | El cambio de estado es simple; el esfuerzo depende de confirmar qué dato del SUA permite detectar la re-derivación (mismo Número de SUA-Año). |
+| Pequeña | Sí | Se limita a marcar, mostrar y retornar el estado (criterios 1 a 3); no incluye resolver conflictos entre dictámenes. |
+| Verificable | Sí | Se comprueba con los criterios 1 y 3: cargar una solicitud ya dictaminada con el mismo Número de SUA-Año debe dejarla en Pendiente-revisión, y al firmar un nuevo dictamen debe volver a Dictaminada. |
+
+---
+
+## HU-15 — Ver el desglose de solicitudes de tormenta en el dashboard
+
+| Campo | Detalle |
+|-------|---------|
+| Historia | Como Jefe, quiero ver en el dashboard un desglose separado de las solicitudes de tormenta, además de que sumen a las métricas generales, para medir por separado el trabajo de emergencia sin perder el total del período. |
+| Módulo | Dashboard |
+| Requisitos relacionados | RF-35, RF-36, RF-37, RF-44 |
+
+### Criterios de aceptación
+
+1. Dado que accedo al dashboard, las solicitudes de tormenta se incluyen en las métricas generales de derivadas, dictaminadas y sin dictaminar.
+2. Además, el dashboard muestra un desglose exclusivo de solicitudes de tormenta con los mismos tres indicadores.
+3. Dado que filtro por mes y por año, el filtro se aplica tanto a las métricas generales como al desglose de tormenta.
+
+### Validación INVEST
+
+| Criterio | ¿Se cumple? | Observación |
+|----------|-------------|-------------|
+| Independiente | Parcial | Se apoya en el dashboard de HU-11 y en solicitudes de tormenta de HU-12; es una dependencia de datos, no de desarrollo. |
+| Negociable | Sí | La presentación del desglose (tarjeta aparte, pestaña o gráfico) puede decidirse en el diseño de UI sin afectar el valor de la historia. |
+| Valiosa | Sí | Se verifica con el criterio 2: permite a la Dirección medir la respuesta a emergencias climáticas sin perder el total general. |
+| Estimable | Sí | Reutiliza las métricas de RF-35 a RF-37 con un filtro adicional por etiqueta de tormenta. |
+| Pequeña | Sí | Se limita a un desglose con los mismos tres indicadores y el filtro existente (criterios 2 y 3); no agrega métricas nuevas. |
+| Verificable | Sí | Se comprueba con el criterio 1: el total general debe ser igual a las solicitudes que no son de tormenta más las de tormenta, verificable con un período de datos de prueba. |

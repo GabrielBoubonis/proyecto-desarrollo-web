@@ -81,8 +81,7 @@ seguimiento para la Dirección.
   dictamen queda guardado y firmado localmente con estado **pendiente de sincronizar**, y el
   sistema reintenta el envío automáticamente hasta lograrlo.
 - Al confirmar la firma, el sistema exige un **segundo factor de autenticación** además de
-  la sesión ya iniciada (código a la cuenta institucional o verificación biométrica del
-  dispositivo), dado que el dictamen es el acto que legalmente habilita o no la intervención
+  la sesión ya iniciada (verificación biométrica del dispositivo, WebAuthn), dado que el dictamen es el acto que legalmente habilita o no la intervención
   sobre el ejemplar (RF-51).
 - Al sincronizar un dictamen firmado sin conexión, el sistema **recalcula el hash de firma**
   sobre el contenido recibido y lo compara contra el generado en el dispositivo al momento
