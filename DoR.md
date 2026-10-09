@@ -26,7 +26,7 @@ criterios de aceptación escritos"), no como un deseo ("la historia está bien d
 
 ## Aplicación a tres historias propias
 
-_Elegimos tres historias de usuario de `historias_usuario.md` con resultados distintos a
+_Elegimos tres historias de usuario de `historias-de-usuario.md` con resultados distintos a
 propósito: una que pasa el filtro completo (HU-01), y dos que muestran huecos reales que ya
 habíamos señalado nosotros mismos en la validación INVEST de cada una (HU-04 y HU-09)._
 

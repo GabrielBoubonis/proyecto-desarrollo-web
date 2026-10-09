@@ -13,15 +13,15 @@ equivalente en `er-modelo.md` (entidad `Dictamen`)._
 | Campo | Tipo / origen | Atributo en er-modelo.md |
 |---|---|---|
 | Distrito | Precargado desde la Solicitud, solo lectura | (vía `Solicitud.distrito`, no se duplica en `Dictamen`) |
-| Nota N.° | Texto, editable | `nota_numero` |
-| Exp N.° | Texto, editable | `expediente_numero` |
+| Nota N.° | Número entero positivo | `nota_numero` |
+| Exp N.° | Número entero positivo | `expediente_numero` |
 | Fecha | Fecha, autogenerada al emitir | `fecha_emision` |
 | SUA N.° | Precargado, solo lectura | (vía `Solicitud.numero_sua`) |
 | Domicilio de solicitud | Precargado, solo lectura | (vía `Solicitud.direccion`) |
-| Domicilio del ejemplar\* | Texto, editable (puede diferir del anterior — ver Decisión 3 en `er-modelo.md`) | `domicilio_ejemplar` |
-| Calle esquina / Número esquina | Texto, editable | `calle_esquina`, `numero_esquina` |
-| Referencia de ubicación | Texto libre, editable | `referencia_ubicacion` |
-| Especie\* | Texto, editable, obligatorio | `especie` |
+| Domicilio del ejemplar\* | Punto elegido en el mapa; la dirección la completa el geocodificador (puede diferir del anterior — ver Decisiones 3 y 10 en `er-modelo.md`) | `domicilio_ejemplar`, `latitud_ejemplar`, `longitud_ejemplar` |
+| Calle esquina / Número esquina | Selección entre calles sugeridas por el geocodificador | `calle_esquina`, `numero_esquina` |
+| Referencia de ubicación | Texto libre con largo máximo | `referencia_ubicacion` |
+| Especie\* | Selección con búsqueda en un catálogo; si la especie no figura, se agrega desde el selector. Obligatorio | `id_especie` |
 | Distancia a medianera/referencia | Numérico, editable | `distancia_medianera_referencia` |
 | Cantidad de ejemplares al frente | Numérico, editable | `cantidad_frente` |
 
@@ -64,10 +64,14 @@ _Deshabilitado por completo si en el Paso 2 se marcó Extracción (RF-46; ver no
 | Campo | Tipo / origen | Atributo en er-modelo.md |
 |---|---|---|
 | Nivel de prioridad de la intervención\* | Selección única: Alta / Media / Baja (urgencia de ejecución, no confundir con la prioridad de triage de la Solicitud — ver Decisión 6 en `er-modelo.md`) | `nivel_prioridad` |
-| Observaciones | Texto libre | `observaciones` |
+| Observaciones | Texto libre con largo máximo | `observaciones` |
 | Firma digital | Generada por el sistema al confirmar (hash + timestamp + usuario, con verificación WebAuthn previa — RF-51) | `hash_firma` |
 
 \* Campo obligatorio.
+
+**Regla general (RF-56):** solo Referencia de ubicación y Observaciones admiten texto libre. Todo
+campo con valores conocidos se elige de una lista cerrada o en el mapa, y el servidor rechaza
+cualquier valor fuera de ellas (ver Decisión 10 en `er-modelo.md`).
 
 ---
 

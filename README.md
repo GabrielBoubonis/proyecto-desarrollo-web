@@ -68,6 +68,9 @@ se cuenta con acceso a los endpoints de producción.
 ├── diagramas/
 │   ├── casos-de-uso.puml
 │   ├── er.puml
+│   ├── estados-solicitud.puml      ← estados de la Solicitud y del Dictamen
+│   ├── actividad-dictamen.puml     ← flujo de emitir dictamen, con modo offline y sincronización
+│   ├── secuencia-login-firma.puml  ← login y firma con segundo factor
 │   └── wireframes/
 └── cuestionario/
 ```
@@ -75,7 +78,7 @@ se cuenta con acceso a los endpoints de producción.
 ## Uso de inteligencia artificial
 
 El grupo usó Claude (Anthropic) como herramienta de apoyo en la redacción y estructuración
-de la documentación (`docs/`), en la generación de wireframes de `diagramas/`, 
+de la documentación (`docs/`), en la generación de los wireframes de `diagramas/`,
 y en la propuesta inicial del stack técnico de `arquitectura_tecnica.md`.
 Las decisiones de fondo — alcance, reglas de negocio, modelo de datos, elección final de
 tecnologías — fueron tomadas por el grupo; la IA se usó para redactar, ordenar y mantener la

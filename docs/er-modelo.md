@@ -13,6 +13,7 @@ _Visualizar en [plantuml.com](https://www.plantuml.com/plantuml/uml/)._
 | Solicitud | Copia local de un reclamo derivado por el SUA a la Dirección Técnica. Identificada con el mismo par (Número de SUA, Año) que usa el SUA, para no duplicar identificadores. | Tiene historial de Dictamen; registra eventos en HistorialDerivacion; pertenece a una o varias RutaSolicitud a lo largo del tiempo. |
 | HistorialDerivacion | Un registro por cada vez que el SUA deriva una Solicitud a la Dirección Técnica (la original y las re-derivaciones por vencimiento). | Pertenece a una Solicitud. |
 | Dictamen | El dictamen técnico completo firmado por un ingeniero para una Solicitud, con todos los campos del formulario físico digitalizados. | Pertenece a una Solicitud y a un Usuario firmante; incluye Fotografia, TrabajoAereo y TrabajoSubterraneo. |
+| Especie | Una especie del catálogo de arbolado, elegible en el formulario del dictamen y ampliable por los usuarios desde el selector. | Referenciada por muchos Dictamen. |
 | Fotografia | Una imagen del ejemplar adjunta a un Dictamen. Obligatoria: un Dictamen no puede firmarse sin al menos una. | Pertenece a un Dictamen. |
 | TrabajoAereo | Un ítem seleccionado del catálogo de trabajos sobre la copa/ramas (Bloque 4 del formulario), de selección múltiple. | Pertenece a un Dictamen. |
 | TrabajoSubterraneo | Un ítem seleccionado del catálogo de trabajos sobre raíces (Bloque 3 del formulario), de selección múltiple. | Pertenece a un Dictamen. |
@@ -72,29 +73,33 @@ _Visualizar en [plantuml.com](https://www.plantuml.com/plantuml/uml/)._
   Solicitud a lo largo del tiempo (historial, RF-27).
 - `numero_sua` (FK, `string`), `anio` (FK, `int`): a qué Solicitud pertenece.
 - `nombre_usuario` (FK, `string`): quién lo firmó.
-- `nota_numero` (`string`), `expediente_numero` (`string`): datos del trámite administrativo
+- `nota_numero` (`int`), `expediente_numero` (`int`): datos del trámite administrativo
   municipal. **Opcionales** (no todo dictamen tiene expediente asociado al momento de
   firmarse).
 - `fecha_emision` (`date`): se guarda junto con el hash como parte de la firma digital
   (RF-22).
 - `domicilio_ejemplar` (`string`): dirección real donde está el árbol, determinada por el
-  ingeniero en el lugar. **Obligatorio.** Se guarda acá y no solo en Solicitud — ver
+  ingeniero en el lugar eligiendo el punto en el mapa (el geocodificador completa la
+  dirección, sin tipeo libre; ver Decisión 10). **Obligatorio.** Se guarda acá y no solo en Solicitud — ver
   Decisión 3.
-- `calle_esquina` (`string`), `numero_esquina` (`string`), `referencia_ubicacion`
-  (`string`), `distancia_medianera_referencia` (`decimal`): datos de ubicación
+- `latitud_ejemplar` (`decimal`), `longitud_ejemplar` (`decimal`): coordenadas del punto
+  elegido en el mapa para `domicilio_ejemplar`. **Obligatorios** junto con él.
+- `calle_esquina` (`string`), `numero_esquina` (`string`): se eligen entre las calles que
+  sugiere el geocodificador (sin tipeo libre). `referencia_ubicacion` (`string`): texto
+  libre con largo máximo. `distancia_medianera_referencia` (`decimal`): datos de ubicación
   complementarios. **Opcionales**, se completan solo cuando el domicilio no tiene
   numeración exacta.
-- `especie` (`string`): especie del ejemplar. **Obligatorio.**
+- `id_especie` (FK, `int`): especie del ejemplar, elegida de la tabla Especie (selector con búsqueda). **Obligatorio.**
 - `cantidad_frente` (`int`): cantidad de ejemplares sobre el frente del domicilio.
   **Obligatorio** (con valor por defecto 1).
-- `nivel_dano_vereda` (`string`): Alto/Medio/Bajo. **Opcional** (no todos los casos tienen
+- `nivel_dano_vereda` (`enum`): Alto/Medio/Bajo. **Opcional** (no todos los casos tienen
   daño en vereda).
 - `es_extraccion` (`boolean`), `perimetro_tronco` (`decimal`), `motivo_extraccion`
-  (`string`): datos del Bloque 2. `perimetro_tronco` y `motivo_extraccion` son
+  (`enum`, 12 opciones): datos del Bloque 2. `perimetro_tronco` y `motivo_extraccion` son
   **obligatorios solo si** `es_extraccion` es verdadero.
-- `es_sin_trabajo` (`boolean`), `motivo_sin_trabajo` (`string`): datos del Bloque 5.
+- `es_sin_trabajo` (`boolean`), `motivo_sin_trabajo` (`enum`, 6 opciones): datos del Bloque 5.
   `motivo_sin_trabajo` es **obligatorio solo si** `es_sin_trabajo` es verdadero.
-- `complejidad` (`string`): Baja/Media/Alta/Máxima. **Obligatorio.** Es la complejidad de la
+- `complejidad` (`enum`): Baja/Media/Alta/Máxima. **Obligatorio.** Es la complejidad de la
   **intervención a realizar sobre el ejemplar**, un dato propio del dictamen. No debe
   confundirse con ningún criterio de generación de rutas (RF-15): son dos conceptos
   independientes, uno se define al armar la ruta (antes de dictaminar) y el otro al
@@ -106,8 +111,8 @@ _Visualizar en [plantuml.com](https://www.plantuml.com/plantuml/uml/)._
   reclamo desde la calle" que se descartó del alcance: acá el dictamen ya parte de una
   Solicitud existente derivada por el SUA, este campo solo documenta el origen para el
   registro legal.
-- `plantar` (`string`): Cazuela / Construir cazuela / Vereda jardín / ninguna. **Opcional.**
-- `nivel_prioridad` (`string`): Alta/Media/Baja. **Obligatorio.** Es la urgencia con la que
+- `plantar` (`enum`): Cazuela / Construir cazuela / Vereda jardín / ninguna. **Opcional.**
+- `nivel_prioridad` (`enum`): Alta/Media/Baja. **Obligatorio.** Es la urgencia con la que
   hay que **ejecutar** la intervención ya dictaminada (por ejemplo, una poda de riesgo
   eléctrico puede necesitar resolverse antes que una de mantenimiento estético), definida
   por el ingeniero al cerrar el dictamen. No debe confundirse con `Solicitud.prioridad`, que
@@ -124,6 +129,17 @@ _Visualizar en [plantuml.com](https://www.plantuml.com/plantuml/uml/)._
   `es_extraccion` es verdadero, no puede existir ninguna fila asociada en TrabajoAereo ni en
   TrabajoSubterraneo para este Dictamen (RF-46). Ver Decisión 5.
 
+### Especie
+
+- `id_especie` (PK, `int`).
+- `nombre_comun` (`string`): nombre con el que figura en el catálogo (ej. Plátano, Fresno).
+- `nombre_cientifico` (`string`): opcional.
+- `activa` (`boolean`): permite retirar una especie del selector sin borrar los dictámenes
+  que ya la usaron.
+- `creada_por` (FK, `string`): usuario que agregó la especie desde el selector; nulo si viene del catálogo inicial.
+
+Catálogo inicial propuesto (a validar con los ingenieros agrónomos): Fresno americano, Fresno europeo, Plátano, Tipa blanca, Paraíso, Ligustro, Arce negundo, Jacarandá, Álamo, Sauce llorón, Crespón, Ceibo, Lapacho rosado, Acacia negra (Gleditsia), Aguaribay, Eucalipto, Morera, Palo borracho, Pindó, Tilo, Olmo, Casuarina, Cina-cina. En el formulario, el selector filtra mientras se escribe; si la especie no figura, la opción "Agregar especie" la incorpora al catálogo con nombre normalizado y sin duplicados (mayúsculas y tildes no distinguen).
+
 ### Fotografia
 
 - `id_foto` (PK, `int`).
@@ -135,7 +151,7 @@ _Visualizar en [plantuml.com](https://www.plantuml.com/plantuml/uml/)._
 
 - `id_trabajo_aereo` (PK, `int`).
 - `id_dictamen` (FK, `int`).
-- `tipo_trabajo` (`string`): uno de los 12 ítems del catálogo del Bloque 4 (poda de
+- `tipo_trabajo` (`enum`): uno de los 12 ítems del catálogo del Bloque 4 (poda de
   formación, liberación de conductores eléctricos, etc.). Cada fila representa **un** ítem
   marcado; un Dictamen puede tener varias filas (selección múltiple confirmada). **No puede
   tener filas si el Dictamen tiene `es_extraccion = true`** (ver Decisión 5).
@@ -144,7 +160,7 @@ _Visualizar en [plantuml.com](https://www.plantuml.com/plantuml/uml/)._
 
 - `id_trabajo_subterraneo` (PK, `int`).
 - `id_dictamen` (FK, `int`).
-- `tipo_trabajo` (`string`): Corte vertical de raíces / Corte horizontal de raíces /
+- `tipo_trabajo` (`enum`): Corte vertical de raíces / Corte horizontal de raíces /
   Agrandamiento de cazuela.
 - `distancia_borde` (`decimal`): **obligatorio solo si** `tipo_trabajo` es "Corte vertical
   de raíces" (es el único de los tres que registra una distancia en el formulario
@@ -362,3 +378,27 @@ derivación), la Solicitud queda disponible igual para consulta y dictamen manua
 coordenadas: se excluye del cálculo de distancia hasta que se corrija manualmente o se
 reintente la geocodificación. No es un caso bloqueante para el resto del sistema, solo para
 el armado automático de rutas de esa solicitud puntual.
+
+### Decisión 10 — Campos del dictamen con valor cerrado, no texto libre
+
+Si un campo con valores conocidos se deja como texto libre, dos ingenieros pueden escribir lo
+mismo de formas distintas ("Plátano", "platano", "Platanus") y los dictámenes dejan de poder
+agruparse, filtrarse o enviarse al SUA de forma consistente. Por eso los campos del Dictamen
+se resuelven así:
+
+- **Tabla de catálogo:** `especie` (`Especie`), porque es una lista larga que puede
+  actualizarse sin tocar el código. Se carga con un catálogo inicial de especies comunes y los usuarios pueden agregar las que falten desde el propio selector, con normalización y sin duplicados. Se carga con un catálogo inicial de especies comunes y los usuarios pueden agregar las que falten desde el propio selector, con normalización y sin duplicados.
+- **Enumeración (`enum`):** `nivel_dano_vereda`, `motivo_extraccion`, `motivo_sin_trabajo`,
+  `complejidad`, `plantar`, `nivel_prioridad` y `tipo_trabajo` (aéreo y subterráneo), porque
+  son listas cortas y fijas del formulario físico.
+- **Mapa y geocodificador:** `domicilio_ejemplar`, `calle_esquina` y `numero_esquina` se
+  eligen en el mapa o entre calles sugeridas; el sistema guarda además las coordenadas.
+- **Número entero:** `nota_numero` y `expediente_numero` son números enteros positivos
+  (solo se aceptan dígitos).
+- **Texto libre, a propósito:** `referencia_ubicacion` y `observaciones`, con largo máximo y
+  saneamiento.
+
+La regla se aplica en el formulario (solo se ofrecen opciones) y también en el servidor, que
+rechaza cualquier valor fuera de la lista (RF-56). El mismo criterio vale para los demás
+atributos de estado y tipo (`Solicitud.estado`, `Solicitud.prioridad`, `Ruta.tipo`,
+`Ruta.estado`, `Usuario.rol`), que se implementan como enumeraciones.

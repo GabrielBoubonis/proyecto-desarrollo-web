@@ -151,7 +151,7 @@ _Cada historia debe incluir formato clásico, criterios de aceptación y validac
 |-------|---------|
 | Historia | Como Operador, quiero completar y firmar digitalmente el dictamen técnico de una solicitud, para dejar registrada la intervención que corresponde sobre el ejemplar. |
 | Módulo | Dictaminación |
-| Requisitos relacionados | RF-20, RF-21, RF-22, RF-23, RF-24, RF-29, RF-45, RF-46, RF-51 |
+| Requisitos relacionados | RF-20, RF-21, RF-22, RF-23, RF-24, RF-29, RF-45, RF-46, RF-51, RF-56 |
 
 ### Criterios de aceptación
 
@@ -161,6 +161,8 @@ _Cada historia debe incluir formato clásico, criterios de aceptación y validac
 4. El formulario del dictamen no muestra nombre ni datos de contacto del vecino, solo la información técnica necesaria (ubicación, descripción del reclamo).
 5. Dado que no adjunté ninguna fotografía del ejemplar, cuando intento firmar el dictamen, el sistema me lo impide y me indica que debo cargar al menos una foto.
 6. Dado que marco "Extracción" en el dictamen, el sistema deshabilita los campos de trabajos en la parte aérea y en la parte subterránea, para no dejar cargada una intervención incongruente con la extracción del ejemplar.
+7. Dado que completo el formulario, los campos con valores conocidos (especie, nivel de daño, motivos, trabajos, complejidad, plantar, prioridad, domicilio y calle esquina) solo me permiten elegir una opción de una lista o un punto en el mapa, sin escribir libremente; solo Referencia de ubicación y Observaciones admiten texto libre. Nota N.° y Expediente N.° solo aceptan números enteros.
+8. Dado que la especie del ejemplar no figura en el selector, cuando elijo "Agregar especie" e ingreso su nombre, el sistema la incorpora al catálogo y la deja seleccionada, rechazando nombres que ya existan (sin distinguir mayúsculas ni tildes).
 
 ### Validación INVEST
 
@@ -268,7 +270,7 @@ _Cada historia debe incluir formato clásico, criterios de aceptación y validac
 ### Criterios de aceptación
 
 1. Dado que tengo dictámenes en estado "pendiente de sincronizar", cuando el dispositivo recupera conexión, el sistema los envía automáticamente al SUA sin intervención manual.
-2. Dado que el envío al SUA falla (por ejemplo, el SUA está caído), el sistema mantiene el dictamen en estado "pendiente de sincronizar" y reintenta más adelante.
+2. Dado que el envío al SUA falla (por ejemplo, el SUA está caído), el sistema mantiene el dictamen en estado "pendiente de sincronizar" y lo reintenta siempre de forma automática, sin límite de reintentos, hasta que el servidor confirme su recepción.
 3. En todo momento puedo ver un indicador que muestra si está todo sincronizado, cuántos dictámenes tengo pendientes, o si no tengo conexión.
 4. Dado que un dictamen firmado sin conexión llega al servidor con un contenido distinto del que tenía al momento de la firma, el sistema detecta que el hash recalculado no coincide, rechaza la sincronización y lo marca para revisión del Administrador en lugar de darlo por sincronizado.
 

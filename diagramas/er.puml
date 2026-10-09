@@ -59,33 +59,35 @@ entity "Dictamen" as dictamen {
   numero_sua : string <<FK>>
   anio : int <<FK>>
   nombre_usuario : string <<FK>>
-  nota_numero : string
-  expediente_numero : string
+  nota_numero : int
+  expediente_numero : int
   fecha_emision : date
   domicilio_ejemplar : string
+  latitud_ejemplar : decimal
+  longitud_ejemplar : decimal
   calle_esquina : string
   numero_esquina : string
   referencia_ubicacion : string
-  especie : string
+  id_especie : int <<FK>>
   distancia_medianera_referencia : decimal
   cantidad_frente : int
-  nivel_dano_vereda : string
+  nivel_dano_vereda : enum
   --
   es_extraccion : boolean
   perimetro_tronco : decimal
-  motivo_extraccion : string
+  motivo_extraccion : enum
   --
   es_sin_trabajo : boolean
-  motivo_sin_trabajo : string
+  motivo_sin_trabajo : enum
   --
-  complejidad : string
+  complejidad : enum
   urgente : boolean
   arbol_frente_garage : boolean
   media_tension : boolean
   de_oficio : boolean
-  plantar : string
+  plantar : enum
   --
-  nivel_prioridad : string
+  nivel_prioridad : enum
   observaciones : string
   hash_firma : string
   estado_sincronizacion : string
@@ -133,6 +135,15 @@ note right of ruta
   General de Parques y Paseos. Ver Decisión 7.
 end note
 
+entity "Especie" as especie {
+  * id_especie : int <<PK>>
+  --
+  nombre_comun : string
+  nombre_cientifico : string
+  activa : boolean
+  creada_por : string <<FK>>
+}
+
 entity "Fotografia" as foto {
   * id_foto : int <<PK>>
   --
@@ -145,14 +156,14 @@ entity "TrabajoAereo" as trabajo_aereo {
   * id_trabajo_aereo : int <<PK>>
   --
   id_dictamen : int <<FK>>
-  tipo_trabajo : string
+  tipo_trabajo : enum
 }
 
 entity "TrabajoSubterraneo" as trabajo_subterraneo {
   * id_trabajo_subterraneo : int <<PK>>
   --
   id_dictamen : int <<FK>>
-  tipo_trabajo : string
+  tipo_trabajo : enum
   distancia_borde : decimal
 }
 
@@ -202,6 +213,8 @@ usuario ||--o{ auditoria : genera
 solicitud ||--o{ dictamen : "tiene historial de"
 solicitud ||--o{ historial : "registra derivaciones"
 
+especie ||--o{ dictamen : "se elige de un catálogo"
+usuario |o--o{ especie : "agrega"
 dictamen ||--|{ foto : "incluye (mínimo 1, obligatoria)"
 dictamen ||--o{ trabajo_aereo : "incluye (0..N, excluyente con es_extraccion)"
 dictamen ||--o{ trabajo_subterraneo : "incluye (0..N, excluyente con es_extraccion)"

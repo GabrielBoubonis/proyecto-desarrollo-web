@@ -48,6 +48,7 @@ API REST, JSON, autenticación por JWT en el header `Authorization: Bearer <toke
 | `/rutas` | `POST /rutas` (generar, RF-14 a RF-19, RF-47 a RF-49), `GET /rutas/activa`, `POST /rutas/:id/restablecer` | RF-14 a RF-19, RF-47 a RF-49 |
 | `/dictamenes` | `POST /dictamenes` (completar y firmar, dispara WebAuthn), `GET /dictamenes/:numeroSua/:anio/historial`, `GET /dictamenes/:id/pdf` | RF-20 a RF-29, RF-45, RF-46, RF-51 |
 | `/sync` | `POST /sync/dictamenes` (cola offline → servidor, recalcula hash, RF-53) | RF-30 a RF-34, RF-53 |
+| `/especies` | `GET /especies?q=` (búsqueda para el selector), `POST /especies` (agregar una especie nueva, normalizada y sin duplicados) | RF-56 |
 | `/dashboard` | `GET /dashboard?mes=&anio=` | RF-35 a RF-37, RF-44 |
 | `/tormenta` | `GET /tormenta`, `POST /tormenta/rutas` | RF-38 a RF-43 |
 | `/auditoria` | `GET /auditoria?usuario=&accion=&desde=&hasta=` | RF-54, RF-55 |
@@ -99,7 +100,8 @@ las credenciales de producción.
 | Segundo factor al firmar | WebAuthn (biometría del dispositivo); ver wireframe `04b-segundo-factor.svg` | RF-51 |
 | Cifrado at-rest en el captor | AES-GCM (Web Crypto API), clave derivada de la sesión activa | RNF-16 |
 | Borrado post-sincronización | al confirmarse la sincronización (RF-33), se eliminan de IndexedDB la fotografía y el dictamen ya enviados | RNF-16 |
-| Rate limiting server-side | 10 intentos / 15 min por combinación IP + usuario, backoff exponencial | RNF-19 |
+| Rate limiting server-side | 10 intentos fallidos / 15 min por combinación IP + usuario (también para usuarios inexistentes), backoff exponencial; capa distinta del bloqueo local a los 5 intentos del captor | RNF-19, RF-52 |
+| Validación de campos cerrados | el servidor valida cada campo de lista cerrada contra su enumeración o tabla de catálogo y responde 422 ante cualquier valor fuera de ella | RF-56 |
 | Sesión | JWT corto (30 min) + refresh token con tope absoluto de 7 días | RF-04, RF-05, RNF-20 |
 | Cabeceras HTTP | CSP `default-src 'self'`, HSTS, `X-Frame-Options: DENY` en todas las respuestas | RNF-21 |
 
@@ -172,7 +174,7 @@ escenario de falla._
 | El mismo ingeniero sincroniza desde dos dispositivos distintos (perdió el celular, usa uno de respaldo). | El UUID por dictamen evita duplicados aunque las dos colas se sincronicen por separado. La organización de un solo captor activo por ingeniero es una política operativa, no una restricción técnica del sistema. |
 | OpenRouteService no responde al generar una ruta. | Ya resuelto: selección solo por antigüedad, sin desempate por distancia, hasta que el servicio vuelva a responder (ver sección 5, punto 5). |
 | Falla la geocodificación de una Solicitud al derivarse. | Ya resuelto: la Solicitud queda disponible para consulta y dictamen manual, pero sin coordenadas, excluida del cálculo de rutas hasta corregirse (ver `er-modelo.md`, Decisión 9). |
-| El mock de SUA / Autenticación Institucional no responde (en producción: el servicio real cae) durante el login. | El sistema informa que no pudo verificar las credenciales y pide reintentar; no existe una copia cacheada de credenciales institucionales con la que loguear "igual" en ese momento. |
+| El mock de SUA / Autenticación Institucional no responde (en producción: el servicio real cae) durante el login. | El sistema muestra un mensaje propio —distinto del error genérico de credenciales (RF-50)— que informa que el servicio de autenticación no está disponible y que se intente nuevamente en un rato; la caída no cuenta como intento fallido (RF-52, RNF-19); no existe una copia cacheada de credenciales institucionales con la que loguear "igual" en ese momento. |
 
 ### 7.3 Concurrencia e integridad de datos
 

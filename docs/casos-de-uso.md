@@ -59,7 +59,7 @@ CU-13 no participa de relaciones `<<include>>`/`<<extend>>`: es un caso de uso i
 
 | # | Situación | Respuesta del sistema |
 |---|-----------|-----------------------|
-| E1 | La Autenticación Institucional no responde. | El sistema informa que el servicio de autenticación no está disponible y sugiere reintentar más tarde. |
+| E1 | La Autenticación Institucional no responde. | El sistema informa que el servicio de autenticación no está disponible y que se intente nuevamente en un rato, con un mensaje distinto del error genérico de credenciales (RF-50); esta situación no cuenta como intento fallido (RF-52, RNF-19). |
 | E2 | El usuario permanece 30 minutos sin interactuar con el sistema. | El sistema cierra la sesión automáticamente y solicita un nuevo ingreso. |
 
 | Campo | Detalle |
