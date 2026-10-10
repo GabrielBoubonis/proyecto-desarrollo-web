@@ -47,7 +47,7 @@ poder trabajar sin conexión en el campo.
 | RF-17 | El sistema debe liberar automáticamente una solicitud reservada en una ruta cuando: se dictamina, el ingeniero presiona "Restablecer", o son las 18:00 hs del día. |
 | RF-18 | El sistema debe permitir a un ingeniero descartar su ruta completa mediante el botón "Restablecer", liberando las solicitudes no dictaminadas. |
 | RF-19 | El sistema debe requerir conexión a internet para generar o confirmar una ruta (no disponible en modo offline). |
-| RF-47 | Cuando la cantidad de solicitudes que cumplen los criterios definidos (RF-15) supere el cupo indicado por el ingeniero, el sistema debe seleccionar cuáles incluir combinando antigüedad de la solicitud (mayor preferencia a las más antiguas) y eficiencia del recorrido resultante (menor tiempo y distancia total según el modo de desplazamiento). _(Nota técnica: criterio de desempate y métrica de eficiencia concretos en `arquitectura_tecnica.md`.)_ |
+| RF-47 | Cuando la cantidad de solicitudes que cumplen los criterios definidos (RF-15) supere el cupo indicado por el ingeniero, el sistema debe seleccionar cuáles incluir combinando antigüedad de la solicitud (mayor preferencia a las más antiguas) y eficiencia del recorrido resultante (menor tiempo y distancia total según el modo de desplazamiento). _(Nota técnica: criterio de desempate y métrica de eficiencia concretos en `arquitectura-tecnica.md`.)_ |
 | RF-48 | El sistema debe calcular el orden de visita de las solicitudes de una ruta minimizando el tiempo y la distancia total del recorrido, tomando como punto de partida y de cierre del cálculo la sede de la Dirección General de Parques y Paseos. |
 | RF-49 | El sistema debe permitir seleccionar el modo de desplazamiento (a pie o en vehículo) como criterio adicional al generar la ruta, y calcular el tiempo y la distancia en función del modo elegido. |
 
@@ -68,7 +68,7 @@ poder trabajar sin conexión en el campo.
 | RF-45 | El sistema debe exigir al menos una fotografía del ejemplar adjunta a cada dictamen, y no debe permitir firmarlo si no hay ninguna cargada. |
 | RF-46 | Si el ingeniero marca "Extracción" en el dictamen, el sistema debe deshabilitar la selección de trabajos en la parte aérea y en la parte subterránea para ese mismo dictamen, y debe rechazar el envío si de todos modos llegaran cargados. |
 | RF-56 | En el formulario del dictamen, todo campo cuyo valor pertenezca a un conjunto conocido (especie, nivel de daño en vereda, motivos de extracción y de sin trabajo, trabajos aéreos y subterráneos, complejidad, plantar, nivel de prioridad, domicilio del ejemplar y calle esquina) debe cargarse eligiendo una opción de una lista cerrada o un punto en el mapa, sin permitir escritura libre, y el servidor debe rechazar cualquier valor que no pertenezca a esas listas. La única excepción controlada es la especie: el selector filtra el catálogo mientras el usuario escribe y, si la especie no figura, ofrece la opción "Agregar especie", que la incorpora al catálogo con su nombre normalizado (sin duplicados por mayúsculas o tildes) y registra quién la agregó. Los campos numéricos y los números de nota y expediente deben aceptar únicamente números enteros (positivos en el caso de nota y expediente); solo Referencia de ubicación y Observaciones admiten texto libre, con largo máximo. |
-| RF-51 | Al confirmar la firma de un dictamen (paso 3 de CU-06), el sistema debe exigir un segundo factor de autenticación mediante verificación biométrica del dispositivo (WebAuthn), además de la sesión ya iniciada, dado el valor legal del acto conforme a la Ordenanza N.° 5.118/91. _(Nota técnica: detalle del flujo WebAuthn en `arquitectura_tecnica.md`.)_ |
+| RF-51 | Al confirmar la firma de un dictamen (paso 3 de CU-06), el sistema debe exigir un segundo factor de autenticación mediante verificación biométrica del dispositivo (WebAuthn), además de la sesión ya iniciada, dado el valor legal del acto conforme a la Ordenanza N.° 5.118/91. _(Nota técnica: detalle del flujo WebAuthn en `arquitectura-tecnica.md`.)_ |
 
 ### Módulo 5 — Trabajo sin conexión y sincronización
 
@@ -117,7 +117,7 @@ poder trabajar sin conexión en el campo.
 |----|-----------|
 | RNF-01 | El sistema debe estar disponible 24/7, salvo ventanas de mantenimiento programadas fuera de la jornada operativa (lunes a sábado, 7 a 17 hs). |
 | RNF-02 | El sistema debe soportar el uso simultáneo de entre 4 y 7 ingenieros sin degradación perceptible del tiempo de respuesta. |
-| RNF-03 | El sistema debe soportar un volumen de al menos 140 dictámenes diarios (aprox. 20 por ingeniero) sin degradación del rendimiento. |
+| RNF-03 | El sistema debe soportar un volumen de al menos 70 dictámenes diarios (hasta 10 por ingeniero, con 7 ingenieros) sin degradación del rendimiento. |
 | RNF-04 | En modo offline, cada solicitud HTTP debe tener un tiempo límite de espera de 10 segundos para no bloquear la interfaz ante señal intermitente. |
 | RNF-15 | El sistema debe soportar la resolución de hasta 100 solicitudes de tormenta dentro de un plazo de 48 horas hábiles, sin degradación del rendimiento. |
 | RNF-17 | Ante una caída específica del SUA (distinta de la falta de conexión general del dispositivo), el sistema debe reintentar automáticamente, con espera creciente entre intentos, la lectura de solicitudes (Módulo 2) y la sincronización de dictámenes (Módulo 5), sin bloquear las funcionalidades que no dependen del SUA (consulta de dictámenes ya cargados, rutas ya generadas). |
@@ -136,7 +136,7 @@ poder trabajar sin conexión en el campo.
 | RNF-19 | El sistema debe limitar server-side los intentos fallidos de inicio de sesión (máximo 10 cada 15 minutos por combinación de IP y usuario, con espera creciente entre bloqueos sucesivos), aplicándolo también a usuarios inexistentes para no revelar cuáles existen. Es una capa distinta e independiente del bloqueo local del captor a los 5 intentos consecutivos (RF-52): el captor se bloquea primero, y este límite protege contra intentos desde otros orígenes y ataques de fuerza bruta distribuidos. Una caída de la Autenticación Institucional no cuenta como intento fallido. |
 | RNF-20 | La sesión de un usuario no debe mantenerse activa, mediante renovación por refresh token, por más de 7 días corridos desde el primer inicio de sesión, independientemente de cuánta actividad registre en ese lapso. |
 | RNF-21 | El sistema debe incluir cabeceras de seguridad HTTP (Content-Security-Policy, HSTS, X-Frame-Options) en todas las respuestas, para mitigar ataques de tipo XSS y clickjacking sobre la interfaz web/PWA. |
-| RNF-22 | Los captores deben entregarse configurados como dispositivos dedicados al sistema, con bloqueo de pantalla obligatorio por PIN o huella, y sin que sea posible apagarlos, reiniciarlos ni desactivar el Wi-Fi, los datos móviles o el modo avión sin autenticarse antes con ese PIN o huella (detalle de configuración en `arquitectura_tecnica.md`). |
+| RNF-22 | Los captores deben entregarse configurados como dispositivos dedicados al sistema, con bloqueo de pantalla obligatorio por PIN o huella, y sin que sea posible apagarlos, reiniciarlos ni desactivar el Wi-Fi, los datos móviles o el modo avión sin autenticarse antes con ese PIN o huella (detalle de configuración en `arquitectura-tecnica.md`). |
 
 ### Almacenamiento y continuidad
 
@@ -151,4 +151,4 @@ poder trabajar sin conexión en el campo.
 |----|-----------|
 | RNF-12 | El sistema debe funcionar como PWA instalable en dispositivos Android (captores provistos por la organización). |
 | RNF-13 | El sistema no requiere soporte para iOS, dado que los dispositivos de campo son exclusivamente Android. |
-| RNF-14 | El sistema debe utilizar un servicio de mapas/geolocalización de uso gratuito para la generación de rutas, que soporte el cálculo de distancia y tiempo estimado tanto a pie como en vehículo (se eligió OpenRouteService; detalle en `arquitectura_tecnica.md`). |
+| RNF-14 | El sistema debe utilizar un servicio de mapas/geolocalización de uso gratuito para la generación de rutas, que soporte el cálculo de distancia y tiempo estimado tanto a pie como en vehículo (se eligió OpenRouteService; detalle en `arquitectura-tecnica.md`). |

@@ -250,7 +250,7 @@ CU-13 no participa de relaciones `<<include>>`/`<<extend>>`: es un caso de uso i
 | Campo | Detalle |
 |-------|---------|
 | Rendimiento | El sistema deberá completar los pasos 3 al 5 sin que el ingeniero deba esperar frente al ejemplar. |
-| Frecuencia | Una media de 20 veces al día por ingeniero (aproximadamente 140 diarias en total). |
+| Frecuencia | Hasta 10 veces al día por ingeniero (aproximadamente 70 diarias en total). |
 | Importancia | Vital |
 | Urgencia | Inmediatamente |
 
@@ -288,7 +288,7 @@ CU-13 no participa de relaciones `<<include>>`/`<<extend>>`: es un caso de uso i
 | Campo | Detalle |
 |-------|---------|
 | Rendimiento | El sistema deberá realizar el envío del paso 2 en segundo plano, sin bloquear el trabajo del ingeniero. |
-| Frecuencia | Una vez por cada dictamen emitido (aproximadamente 140 diarias). |
+| Frecuencia | Una vez por cada dictamen emitido (aproximadamente 70 diarias). |
 | Importancia | Vital |
 | Urgencia | Inmediatamente |
 
@@ -497,6 +497,8 @@ CU-13 no participa de relaciones `<<include>>`/`<<extend>>`: es un caso de uso i
 | # | Situación | Respuesta del sistema |
 |---|-----------|-----------------------|
 | E1 | No hay eventos que cumplan el filtro aplicado. | El sistema muestra el listado vacío, indicando que no hay resultados para ese filtro. |
+| E2 | El rango de fechas es inválido (la fecha "desde" es posterior a la fecha "hasta"). | El sistema no aplica el filtro, conserva el listado anterior e informa que el rango de fechas es inválido para que lo corrija. |
+| E3 | El registro de auditoría no se puede leer (por ejemplo, falla de la base de datos). | El sistema informa que no pudo cargar el registro y permite reintentar; no muestra datos parciales ni altera ningún evento. |
 
 | Campo | Detalle |
 |-------|---------|

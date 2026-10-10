@@ -9,7 +9,7 @@ apunta acá en los puntos donde esto aplica; el detalle completo vive únicament
 archivo, para no romper el formato exigido en los demás._
 
 _Todas las piezas elegidas son gratuitas / de código abierto, sin costo de licencia ni de
-uso en el volumen de esta demo (4 a 7 ingenieros, ~140 dictámenes/día)._
+uso en el volumen de esta demo (hasta 7 ingenieros, ~70 dictámenes/día)._
 
 ---
 
@@ -61,7 +61,7 @@ por separado.
 
 ## 3. Esquemas simulados para la demo (SUA y Autenticación Institucional)
 
-`contexto_proyecto.md` establece que la demo usa dos bases precargadas, simuladas, sin
+El alcance del proyecto establece que la demo usa dos bases precargadas, simuladas, sin
 llamadas HTTP reales. Estos son los esquemas mínimos propuestos para esas dos bases —
 **son una aproximación para la demo, no el contrato real del SUA** (ver `alcance.md` §5,
 "el esquema de campos usado en este documento es una aproximación, sujeto a validación
@@ -267,7 +267,6 @@ a distancia.
 | Frecuencia de backup indefinida (RNF-11) | Sección 9 (la define el CIL) |
 | 24/7 incompatible con hosting gratuito de la demo (RNF-01) | Sección 9 (demo en mejor esfuerzo; producción por CIL) |
 
-**Lo que sigue sin poder cerrarse acá** (depende de terceros, ver reporte de vacíos
-anterior en la conversación): el esquema real de campos del SUA y de la Autenticación
+**Lo que sigue sin poder cerrarse acá** (depende de terceros): el esquema real de campos del SUA y de la Autenticación
 Institucional, y la confirmación del indicador de re-derivación — ambos requieren
 validación directa con el CIL y el equipo del SUA, no son una decisión de este equipo.

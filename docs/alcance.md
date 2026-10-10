@@ -129,7 +129,7 @@ seguimiento para la Dirección.
   testear). Las solicitudes se agrupan primero en franjas de antigüedad de 2 días
   corridos; dentro de la misma franja, se prioriza la que genera menor distancia
   acumulada respecto del resto de la ruta ya seleccionada. _(Detalle del algoritmo en
-  `arquitectura_tecnica.md`.)_
+  `arquitectura-tecnica.md`.)_
 - **Criterio de orden de visita:** una vez seleccionadas las solicitudes, el sistema ordena
   su visita minimizando el tiempo y la distancia total del recorrido. El punto de partida
   del cálculo es la sede de la **Dirección General de Parques y Paseos**, usada también

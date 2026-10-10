@@ -1,7 +1,7 @@
 # Dictamen Técnico de Arbolado — detalle de campos
 
 _Este archivo es un respaldo de referencia: enumera los ~25 campos del formulario físico
-"Dictamen Técnico de Arbolado" que el formulario digital reproduce (ver `diseno_ui.md`,
+"Dictamen Técnico de Arbolado" que el formulario digital reproduce (ver `diseño-ui.md`,
 Pantalla/Módulo 4, y el wireframe `diagramas/wireframes/04-formulario-dictamen.svg`), con el
 paso del formulario digital en el que aparece cada uno y, cuando corresponde, el atributo
 equivalente en `er-modelo.md` (entidad `Dictamen`)._

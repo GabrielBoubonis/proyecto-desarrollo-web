@@ -370,7 +370,7 @@ ruta. Se evaluaron dos opciones:
   siguiente.
 - **Geocodificar una sola vez y cachear el resultado (la elegida).** Se agregan `latitud` y
   `longitud` a `Solicitud`, completados por el sistema la primera vez que la solicitud se
-  deriva (vía la API de Geocoding de OpenRouteService, ver `arquitectura_tecnica.md`,
+  deriva (vía la API de Geocoding de OpenRouteService, ver `arquitectura-tecnica.md`,
   sección 5). Generar una ruta después solo lee estas coordenadas, sin volver a geocodificar.
 
 Si la geocodificación falla (dirección ambigua o servicio caído en el momento de la

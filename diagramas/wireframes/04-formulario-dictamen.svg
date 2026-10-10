@@ -38,7 +38,7 @@
   <text x="304" y="126" font-size="7" fill="#999" text-anchor="middle">Firma</text>
 
   <text x="24" y="150" font-size="10" fill="#888">Pasos 1-2 ya completados: Encabezado/ubicación y Diagnóstico (daño en vereda,</text>
-  <text x="24" y="162" font-size="10" fill="#888">extracción, sin trabajo). Ver detalle de los 5 pasos en diseno_ui.md.</text>
+  <text x="24" y="162" font-size="10" fill="#888">extracción, sin trabajo). Ver detalle de los 5 pasos en diseño-ui.md.</text>
 
   <!-- section title -->
   <text x="24" y="192" font-size="13" font-weight="bold" fill="#333">Trabajos de intervención</text>
