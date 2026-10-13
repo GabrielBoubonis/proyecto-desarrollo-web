@@ -66,8 +66,6 @@ se cuenta con acceso a los endpoints de producción.
 │   ├── dictamen-tecnico-campos.md  ← detalle de campos del formulario físico (respaldo de diseño-ui.md)
 │   └── arquitectura-tecnica.md     ← decisiones técnicas de implementación (stack, API, seguridad); no forma parte de las plantillas de la cátedra
 ├── datos-prueba/                   ← datos ficticios para cargar la demo (ver README_datos_prueba.md)
-├── seguridad/
-│   └── Trabajo_Practico_Anual_Seguridad (.md, .docx, .pdf)
 ├── diagramas/
 │   ├── casos-de-uso.puml
 │   ├── er.puml
@@ -81,8 +79,8 @@ se cuenta con acceso a los endpoints de producción.
 ## Uso de inteligencia artificial
 
 El grupo usó Claude (Anthropic) como herramienta de apoyo en la redacción y estructuración
-de la documentación (`docs/`), en la generación de los diagramas PlantUML y los wireframes
-de `diagramas/`, y en la propuesta inicial del stack técnico de `arquitectura-tecnica.md`.
+de la documentación (`docs/`), en la generación de los wireframes de `diagramas/` y en la 
+propuesta inicial del stack técnico de `arquitectura-tecnica.md`.
 Las decisiones de fondo — alcance, reglas de negocio, modelo de datos, elección final de
 tecnologías — fueron tomadas por el grupo; la IA se usó para redactar, ordenar y mantener la
 trazabilidad entre documentos una vez tomadas esas decisiones. Todo el contenido generado fue
