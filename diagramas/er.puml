@@ -65,8 +65,6 @@ entity "Dictamen" as dictamen {
   domicilio_ejemplar : string
   latitud_ejemplar : decimal
   longitud_ejemplar : decimal
-  calle_esquina : string
-  numero_esquina : string
   referencia_ubicacion : string
   id_especie : int <<FK>>
   distancia_medianera_referencia : decimal
@@ -225,7 +223,7 @@ note right of auditoria
   INSERT y SELECT. Ningún flujo del sistema
   expone UPDATE ni DELETE sobre sus filas
   (registro inmutable, RF-54). Ver Decisión 8
-  en er-modelo.md y CU-13 en casos_de_uso.md.
+  en er-modelo.md y CU-13 en casos-de-uso.md.
 end note
 
 usuario ||--o{ dictamen : firma
